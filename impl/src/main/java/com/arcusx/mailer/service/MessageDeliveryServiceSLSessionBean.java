@@ -92,5 +92,8 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		message.setSubject(subject);
 		message.setText(body);
 		Transport.send(message);
+
+		// log delivery
+		logger.info("Message with recipients " + recipients + " and subject '" + subject + " successfully delivered.");
 	}
 }
