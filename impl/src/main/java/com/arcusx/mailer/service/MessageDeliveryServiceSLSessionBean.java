@@ -70,7 +70,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 
 		try
 		{
-			MessageEntity n = this.entityManager.find(MessageEntity.class, notificationId);
+			MessageEntity n = this.entityManager.find(MessageEntityBean.class, notificationId);
 			Collection<String> recipients = Arrays.asList(n.getRecipients().split(","));
 			sendEmail(recipients, n.getSender(), n.getSubject(), n.getBody());
 			n.setSentDate(new Date());
