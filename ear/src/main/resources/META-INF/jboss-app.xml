@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE jboss-app>
+
+<jboss-app>
+	<loader-repository>com.arcusx:loader=arcusx-mailer-ear</loader-repository>
+</jboss-app>
