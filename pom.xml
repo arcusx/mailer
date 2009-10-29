@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -8,13 +7,13 @@
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
   <name>arcusx-mailer</name>
   <description>arcusx-mailer</description>
   <scm>
-    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</connection>
-    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</developerConnection>
+    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/tags/arcusx-mailer-1.0.1</connection>
+    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/tags/arcusx-mailer-1.0.1</developerConnection>
   </scm>
   <build>
     <pluginManagement>
@@ -47,13 +46,13 @@
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-api</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-impl</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.1</version>
         <type>ejb</type>
 	<scope>compile</scope>
       </dependency>
