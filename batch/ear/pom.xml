@@ -22,10 +22,11 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>arcusx-mailer-batch-impl</artifactId>
 						</ejbModule>
-						<ejbModule>
+						<jarModule>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>arcusx-mailer-persistence</artifactId>
-						</ejbModule>
+							<artifactId>arcusx-mailer-service-api</artifactId>
+							<includeInApplicationXml>true</includeInApplicationXml>
+						</jarModule>
 					</modules>
 					<resourcesDir>src/main/resources/</resourcesDir>
 				</configuration>
@@ -44,8 +45,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-persistence</artifactId>
-			<type>ejb</type>
+			<artifactId>arcusx-mailer-service-api</artifactId>
+			<type>jar</type>
 		</dependency>
 	</dependencies>
 </project>

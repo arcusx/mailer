@@ -33,8 +33,8 @@ import org.jboss.annotation.ejb.RemoteBinding;
 import com.arcusx.mailer.MailerException;
 import com.arcusx.mailer.MailerService;
 import com.arcusx.mailer.Message;
-import com.arcusx.mailer.persistence.MessageEntity;
-import com.arcusx.mailer.persistence.MessageEntityBean;
+import com.arcusx.mailer.service.persistence.MessageEntity;
+import com.arcusx.mailer.service.persistence.MessageEntityBean;
 
 /**
  *

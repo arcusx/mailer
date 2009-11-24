@@ -2,7 +2,6 @@
   <name>arcusx-mailer-service-ear</name>
   <comment>arcusx-mailer-service-ear</comment>
   <projects>
-    <project>arcusx-mailer-persistence</project>
     <project>arcusx-mailer-service-api</project>
     <project>arcusx-mailer-service-impl</project>
   </projects>

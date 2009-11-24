@@ -19,18 +19,16 @@
 
 package com.arcusx.mailer.batch;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
+import com.arcusx.mailer.MessageManager;
 import com.arcusx.pulse.PulseEvent;
 import com.arcusx.pulse.PulseEventHandler;
 
@@ -48,11 +46,11 @@ public class MailerPulseEventHandlerMDB implements PulseEventHandler
 {
 	private static Logger logger = Logger.getLogger(MailerPulseEventHandlerMDB.class);
 
-	@PersistenceContext
-	private EntityManager entityManager;
+	@EJB(mappedName = MessageManager.JNDI_NAME)
+	private MessageManager messageManager;
 
 	@EJB
-	private MessageDeliveryService messageSendService;
+	private MessageDeliveryService messageDeliveryService;
 
 	public MailerPulseEventHandlerMDB()
 	{
@@ -60,25 +58,35 @@ public class MailerPulseEventHandlerMDB implements PulseEventHandler
 
 	public void handleEvent(PulseEvent ev)
 	{
+		if (logger.isDebugEnabled())
+			logger.debug("Looking for messages to be sent...");
+
+		List<Long> unsentMessageIds = null;
 		try
 		{
-			@SuppressWarnings("unchecked")
-			List<BigInteger> messageIds = this.entityManager.createNativeQuery(
-					"select m.message_id from mailer.message m where sent_date is null").getResultList();
-
-			if (logger.isInfoEnabled())
-				logger.info("Sending " + messageIds.size() + " messages(s)...");
-
-			for (BigInteger notificationId : messageIds)
-			{
-				this.messageSendService.sendMessage(Long.valueOf(notificationId.longValue()));
-			}
+			unsentMessageIds = this.messageManager.fetchUndeliveredMessageIds();
 		}
 		catch (Exception ex)
 		{
-			logger.error("Sending notification failed.", ex);
+			logger.error("Selecting messages failed.", ex);
 
 			throw new EJBException(ex);
 		}
+
+		if (logger.isDebugEnabled())
+			logger.debug(unsentMessageIds.size() + " message(s) to be sent...");
+
+		for (Long currMessageId : unsentMessageIds)
+		{
+			try
+			{
+				this.messageDeliveryService.sendMessage(currMessageId);
+			}
+			catch (Exception ex)
+			{
+				logger.error("Sending message " + currMessageId + " failed.", ex);
+			}
+		}
+
 	}
 }

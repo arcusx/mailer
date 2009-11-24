@@ -37,7 +37,6 @@
     </plugins>
   </build>
   <modules>
-    <module>persistence</module>
     <module>service/api</module>
     <module>service/impl</module>
     <module>service/ear</module>
@@ -62,13 +61,6 @@
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-batch-impl</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
-        <type>ejb</type>
-	<scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.arcusx.mailer</groupId>
-        <artifactId>arcusx-mailer-persistence</artifactId>
         <version>1.0.2-SNAPSHOT</version>
         <type>ejb</type>
 	<scope>compile</scope>

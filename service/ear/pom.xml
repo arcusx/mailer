@@ -27,10 +27,6 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>arcusx-mailer-service-impl</artifactId>
 						</ejbModule>
-						<ejbModule>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>arcusx-mailer-persistence</artifactId>
-						</ejbModule>
 					</modules>
 					<resourcesDir>src/main/resources/</resourcesDir>
 				</configuration>
@@ -49,11 +45,6 @@
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
 			<artifactId>arcusx-mailer-service-impl</artifactId>
-			<type>ejb</type>
-		</dependency>
-		<dependency>
-			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-persistence</artifactId>
 			<type>ejb</type>
 		</dependency>
 	</dependencies>

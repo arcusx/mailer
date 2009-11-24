@@ -3,7 +3,7 @@
   <comment>arcusx-mailer-batch-ear</comment>
   <projects>
     <project>arcusx-mailer-batch-impl</project>
-    <project>arcusx-mailer-persistence</project>
+    <project>arcusx-mailer-service-api</project>
   </projects>
   <buildSpec/>
   <natures/>

@@ -21,27 +21,25 @@ package com.arcusx.mailer.batch;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import com.arcusx.mailer.persistence.MessageEntity;
-import com.arcusx.mailer.persistence.MessageEntityBean;
+import com.arcusx.mailer.Message;
+import com.arcusx.mailer.MessageManager;
 
 /**
  *
@@ -54,33 +52,40 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 {
 	private static Logger logger = Logger.getLogger(MessageDeliveryServiceSLSessionBean.class);
 
-	@PersistenceContext
-	private EntityManager entityManager;
-
 	@Resource(mappedName = "java:/Mail")
 	private Session session;
+
+	@EJB(mappedName = MessageManager.JNDI_NAME)
+	private MessageManager messageManager;
+
+	@Resource
+	private SessionContext sessionContext;
 
 	public MessageDeliveryServiceSLSessionBean()
 	{
 	}
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@PermitAll
-	public void sendMessage(Long notificationId)
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void sendMessage(Long messageId)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Looking for messages to be sent...");
-
 		try
 		{
-			MessageEntity n = this.entityManager.find(MessageEntityBean.class, notificationId);
+			Message n = this.messageManager.fetchMessage(messageId);
+
 			Collection<String> recipients = Arrays.asList(n.getRecipients().split(","));
 			sendEmail(recipients, n.getSender(), n.getSubject(), n.getBody());
-			n.setSentDate(new Date());
+
+			this.messageManager.markMessageSent(messageId);
 		}
 		catch (Exception ex)
 		{
-			throw new EJBException(ex);
+			this.sessionContext.setRollbackOnly();
+
+			String msg = "Sending message failed. Rolling back tx.";
+			logger.error(msg, ex);
+
+			throw new EJBException(msg);
 		}
 	}
 
@@ -90,7 +95,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		message.setFrom(new InternetAddress(sender));
 		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
 		{
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
 		}
 		message.setSubject(subject);
 		message.setText(body);

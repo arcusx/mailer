@@ -17,36 +17,21 @@
  *
  */
 
-package com.arcusx.mailer.persistence;
+package com.arcusx.mailer;
 
-import java.util.Date;
+import java.io.Serializable;
 
 /**
  *
  * @author conni
  * @version $Id$
  */
-public interface MessageEntity
+public class MessageManagerException extends Exception implements Serializable
 {
-	Long getMessageId();
+	private static final long serialVersionUID = 1L;
 
-	Date getSentDate();
-
-	void setSentDate(Date sentDate);
-
-	String getSender();
-
-	void setSender(String sender);
-
-	String getRecipients();
-
-	void setRecipients(String recipients);
-
-	String getSubject();
-
-	void setSubject(String subject);
-
-	String getBody();
-
-	void setBody(String body);
+	public MessageManagerException(String msg)
+	{
+		super(msg);
+	}
 }

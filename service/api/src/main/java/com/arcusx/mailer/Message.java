@@ -30,6 +30,8 @@ public final class Message implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	private Long messageId;
+
 	private String sender;
 
 	private String recipients;
@@ -40,6 +42,16 @@ public final class Message implements Serializable
 
 	public Message()
 	{
+	}
+
+	public Message(Long messageId)
+	{
+		this.messageId = messageId;
+	}
+
+	public Long getMessageId()
+	{
+		return this.messageId;
 	}
 
 	public String getSender()

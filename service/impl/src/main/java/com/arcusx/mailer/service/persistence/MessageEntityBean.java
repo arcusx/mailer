@@ -17,7 +17,7 @@
  *
  */
 
-package com.arcusx.mailer.persistence;
+package com.arcusx.mailer.service.persistence;
 
 import java.util.Date;
 

@@ -36,12 +36,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-persistence</artifactId>
-			<scope>compile</scope>
-			<type>ejb</type>
-		</dependency>
-		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<scope>provided</scope>
@@ -50,16 +44,6 @@
 			<groupId>com.arcusx.3rdparty.org.jboss.jbossas</groupId>
 			<artifactId>jboss-ejb-libs</artifactId>
 			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.arcusx.pulse</groupId>
-			<artifactId>arcusx-pulse-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

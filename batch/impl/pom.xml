@@ -32,9 +32,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-persistence</artifactId>
+			<artifactId>arcusx-mailer-service-api</artifactId>
 			<scope>compile</scope>
-			<type>ejb</type>
+			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
