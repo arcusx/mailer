@@ -18,11 +18,6 @@
 				<artifactId>maven-ear-plugin</artifactId>
 				<configuration>
 					<modules>
-						<jarModule>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>arcusx-mailer-api</artifactId>
-							<includeInApplicationXml>true</includeInApplicationXml>
-						</jarModule>
 						<ejbModule>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>arcusx-mailer-batch-impl</artifactId>
@@ -42,10 +37,6 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<dependency>
-			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-api</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
 			<artifactId>arcusx-mailer-batch-impl</artifactId>

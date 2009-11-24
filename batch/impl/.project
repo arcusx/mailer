@@ -2,7 +2,6 @@
   <name>arcusx-mailer-batch-impl</name>
   <comment>arcusx-mailer-batch-impl</comment>
   <projects>
-    <project>arcusx-mailer-api</project>
     <project>arcusx-mailer-persistence</project>
   </projects>
   <buildSpec>

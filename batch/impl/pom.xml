@@ -32,11 +32,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.arcusx.mailer</groupId>
 			<artifactId>arcusx-mailer-persistence</artifactId>
 			<scope>compile</scope>
 			<type>ejb</type>

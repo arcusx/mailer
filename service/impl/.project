@@ -2,8 +2,8 @@
   <name>arcusx-mailer-service-impl</name>
   <comment>arcusx-mailer-service-impl</comment>
   <projects>
-    <project>arcusx-mailer-api</project>
     <project>arcusx-mailer-persistence</project>
+    <project>arcusx-mailer-service-api</project>
   </projects>
   <buildSpec>
     <buildCommand>

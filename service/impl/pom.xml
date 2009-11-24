@@ -32,7 +32,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-api</artifactId>
+			<artifactId>arcusx-mailer-service-api</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

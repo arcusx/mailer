@@ -20,7 +20,7 @@
 					<modules>
 						<jarModule>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>arcusx-mailer-api</artifactId>
+							<artifactId>arcusx-mailer-service-api</artifactId>
 							<includeInApplicationXml>true</includeInApplicationXml>
 						</jarModule>
 						<ejbModule>
@@ -44,7 +44,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-api</artifactId>
+			<artifactId>arcusx-mailer-service-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>

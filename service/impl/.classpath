@@ -7,8 +7,8 @@
   <classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1.jar" sourcepath="M2_REPO/javax/mail/mail/1.4.1/mail-1.4.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0.jar" sourcepath="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0-sources.jar"/>
-  <classpathentry kind="src" path="/arcusx-mailer-api"/>
   <classpathentry kind="src" path="/arcusx-mailer-persistence"/>
+  <classpathentry kind="src" path="/arcusx-mailer-service-api"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/pulse/arcusx-pulse-api/1.1/arcusx-pulse-api-1.1.jar" sourcepath="M2_REPO/com/arcusx/pulse/arcusx-pulse-api/1.1/arcusx-pulse-api-1.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/ejb3-persistence/4.2.0-GA/ejb3-persistence-4.2.0-GA.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/jboss-all-client/4.2.0-GA/jboss-all-client-4.2.0-GA.jar"/>

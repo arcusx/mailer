@@ -37,8 +37,8 @@
     </plugins>
   </build>
   <modules>
-    <module>api</module>
     <module>persistence</module>
+    <module>service/api</module>
     <module>service/impl</module>
     <module>service/ear</module>
     <module>batch/impl</module>
@@ -48,7 +48,7 @@
     <dependencies>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
-        <artifactId>arcusx-mailer-api</artifactId>
+        <artifactId>arcusx-mailer-service-api</artifactId>
         <version>1.0.2-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>
