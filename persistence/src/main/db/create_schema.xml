@@ -1,0 +1,13 @@
+create schema mailer;
+
+create sequence mailer.message_seq start 10000;
+
+create table mailer.message (
+	message_id int8 primary key,
+	sender varchar(80) not null,
+	recipients varchar(200) not null,
+	subject varchar(200) not null,
+	body text not null,
+	sent_date timestamp
+);
+

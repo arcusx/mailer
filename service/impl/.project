@@ -1,0 +1,16 @@
+<projectDescription>
+  <name>arcusx-mailer-service-impl</name>
+  <comment>arcusx-mailer-service-impl</comment>
+  <projects>
+    <project>arcusx-mailer-api</project>
+    <project>arcusx-mailer-persistence</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>

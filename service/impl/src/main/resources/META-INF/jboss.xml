@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<!--
+  -
+  - This software is written by arcus(x) GmbH and subject
+  - to a contract between arcus(x) and its customer.
+  -
+  - This software stays property of arcus(x) unless differing
+  - arrangements between arcus(x) and its customer apply.
+  -
+  - arcus(x) GmbH
+  - Bergiusstrasse 27
+  - D-22765 Hamburg, Germany
+  -
+  - Tel.: +49 (0)40.333 102 92
+  - Fax.: +49 (0)40.333 102 93
+  - http://www.arcusx.com
+  - mailto:info@arcusx.com
+  -->
+
+<!-- $Id$ -->
+
+<jboss xmlns:xsi="http://www.w3.org/2001/XMLSchema"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss_5_0.xsd" 
+	version="3.0">
+	<enterprise-beans>
+		<message-driven>
+			<ejb-name>MailerPulseEventHandlerMDB</ejb-name>
+			<resource-adapter-name>arcusx-pulse-ra.rar</resource-adapter-name>
+		</message-driven>
+	</enterprise-beans>
+</jboss>

@@ -1,0 +1,11 @@
+<projectDescription>
+  <name>arcusx-mailer-batch-ear</name>
+  <comment>arcusx-mailer-batch-ear</comment>
+  <projects>
+    <project>arcusx-mailer-api</project>
+    <project>arcusx-mailer-batch-impl</project>
+    <project>arcusx-mailer-persistence</project>
+  </projects>
+  <buildSpec/>
+  <natures/>
+</projectDescription>

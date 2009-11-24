@@ -17,36 +17,14 @@
  *
  */
 
-package com.arcusx.mailer.service;
-
-import java.util.Date;
+package com.arcusx.mailer.batch;
 
 /**
  *
  * @author conni
  * @version $Id$
  */
-public interface MessageEntity
+public interface MessageDeliveryService
 {
-	Long getMessageId();
-
-	Date getSentDate();
-
-	void setSentDate(Date sentDate);
-
-	String getSender();
-
-	void setSender(String sender);
-
-	String getRecipients();
-
-	void setRecipients(String recipients);
-
-	String getSubject();
-
-	void setSubject(String subject);
-
-	String getBody();
-
-	void setBody(String body);
+	void sendMessage(Long messageId);
 }

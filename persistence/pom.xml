@@ -7,7 +7,7 @@
 		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 	<groupId>com.arcusx.mailer</groupId>
-	<artifactId>arcusx-mailer-impl</artifactId>
+	<artifactId>arcusx-mailer-persistence</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<name>${artifactId}</name>
 	<packaging>ejb</packaging>
@@ -28,18 +28,12 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencyManagement/>
+	<dependencyManagement />
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
 			<artifactId>arcusx-mailer-api</artifactId>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.arcusx.mailer</groupId>
-			<artifactId>arcusx-mailer-persistence</artifactId>
-			<scope>compile</scope>
-			<type>ejb</type>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -50,6 +44,16 @@
 			<groupId>com.arcusx.3rdparty.org.jboss.jbossas</groupId>
 			<artifactId>jboss-ejb-libs</artifactId>
 			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.arcusx.pulse</groupId>
+			<artifactId>arcusx-pulse-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
