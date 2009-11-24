@@ -19,7 +19,9 @@
 
 package com.arcusx.mailer.service;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +32,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.jboss.annotation.ejb.RemoteBinding;
 
@@ -61,17 +64,26 @@ public class MessageManagerSLSessionBean implements MessageManager
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public List<Long> fetchUndeliveredMessageIds() throws MessageManagerException
 	{
-		List<Long> messageIds = this.entityManager.createNativeQuery(
-				"select m.message_id from mailer.message m where sent_date is null", Long.class).getResultList();
-		return messageIds;
+		// hibernate sucks ass
+		List<BigInteger> messageIds = this.entityManager.createNativeQuery(
+				"select m.message_id from mailer.message m where sent_date is null").getResultList();
+		List<Long> result = new ArrayList<Long>(messageIds.size());
+		for (BigInteger curr : messageIds)
+		{
+			result.add(Long.valueOf(curr.longValue()));
+		}
+
+		return result;
 	}
 
 	@PermitAll
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Message fetchMessage(Long messageId) throws MessageManagerException
 	{
-		List<MessageEntity> messages = this.entityManager.createNativeQuery(
-				"select m.* from mailer.message m where m.message_id = ?", MessageEntityBean.class).getResultList();
+		Query query = this.entityManager.createNativeQuery("select m.* from mailer.message m where m.message_id = ?",
+				MessageEntityBean.class);
+		query.setParameter(1, messageId);
+		List<MessageEntity> messages = query.getResultList();
 		if (messages == null || messages.isEmpty())
 			throw new MessageManagerException("Message " + messageId + " not found.");
 
