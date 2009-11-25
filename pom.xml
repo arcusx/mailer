@@ -7,13 +7,13 @@
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
   <packaging>pom</packaging>
   <name>arcusx-mailer</name>
   <description>arcusx-mailer</description>
   <scm>
-    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</connection>
-    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</developerConnection>
+    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/tags/arcusx-mailer-1.0.2</connection>
+    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/tags/arcusx-mailer-1.0.2</developerConnection>
   </scm>
   <build>
     <pluginManagement>
@@ -48,20 +48,20 @@
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-service-api</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-service-impl</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
         <type>ejb</type>
 	<scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-batch-impl</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
         <type>ejb</type>
 	<scope>compile</scope>
       </dependency>
