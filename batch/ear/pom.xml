@@ -4,11 +4,11 @@
   <parent>
     <artifactId>arcusx-mailer</artifactId>
     <groupId>com.arcusx.mailer</groupId>
-    <version>1.0.2</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer-batch-ear</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.2-SNAPSHOT</version>
   <name>${artifactId}</name>
   <packaging>ear</packaging>
   <description>${artifactId}</description>
