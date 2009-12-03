@@ -68,7 +68,7 @@ public class MessageManagerSLSessionBean implements MessageManager
 		// hibernate sucks ass
 		Query query = this.entityManager
 				.createNativeQuery("select m.message_id from mailer.message m where sent_date is null and failure_count < ?");
-		query.setParameter(0, Integer.valueOf(MAX_FAILURE_COUNT));
+		query.setParameter(1, Integer.valueOf(MAX_FAILURE_COUNT));
 		List<BigInteger> messageIds = query.getResultList();
 		List<Long> result = new ArrayList<Long>(messageIds.size());
 		for (BigInteger curr : messageIds)
