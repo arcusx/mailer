@@ -35,4 +35,6 @@ public interface MessageManager
 	Message fetchMessage(Long messageId) throws MessageManagerException;
 
 	void markMessageSent(Long messageId) throws MessageManagerException;
+
+	void countMessageSendFailure(Long messageId) throws MessageManagerException;
 }

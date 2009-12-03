@@ -49,4 +49,8 @@ public interface MessageEntity
 	String getBody();
 
 	void setBody(String body);
+
+	int getFailureCount();
+
+	void setFailureCount(int failureCount);
 }

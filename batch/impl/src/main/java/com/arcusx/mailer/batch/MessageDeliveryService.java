@@ -26,5 +26,5 @@ package com.arcusx.mailer.batch;
  */
 public interface MessageDeliveryService
 {
-	void sendMessage(Long messageId);
+	boolean sendMessage(Long messageId);
 }

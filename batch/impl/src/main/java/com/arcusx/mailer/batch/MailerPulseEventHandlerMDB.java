@@ -80,7 +80,9 @@ public class MailerPulseEventHandlerMDB implements PulseEventHandler
 		{
 			try
 			{
-				this.messageDeliveryService.sendMessage(currMessageId);
+				boolean sent = this.messageDeliveryService.sendMessage(currMessageId);
+				if (!sent)
+					logger.error("Sending message " + currMessageId + " failed.");
 			}
 			catch (Exception ex)
 			{

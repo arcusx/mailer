@@ -19,7 +19,6 @@
 
 package com.arcusx.mailer.service;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +52,8 @@ import com.arcusx.mailer.service.persistence.MessageEntityBean;
 // @SecurityDomain
 public class MessageManagerSLSessionBean implements MessageManager
 {
+	private static final int MAX_FAILURE_COUNT = 10;
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -65,8 +66,10 @@ public class MessageManagerSLSessionBean implements MessageManager
 	public List<Long> fetchUndeliveredMessageIds() throws MessageManagerException
 	{
 		// hibernate sucks ass
-		List<BigInteger> messageIds = this.entityManager.createNativeQuery(
-				"select m.message_id from mailer.message m where sent_date is null").getResultList();
+		Query query = this.entityManager
+				.createNativeQuery("select m.message_id from mailer.message m where sent_date is null and failure_count < ?");
+		query.setParameter(0, Integer.valueOf(MAX_FAILURE_COUNT));
+		List<BigInteger> messageIds = query.getResultList();
 		List<Long> result = new ArrayList<Long>(messageIds.size());
 		for (BigInteger curr : messageIds)
 		{
@@ -111,4 +114,17 @@ public class MessageManagerSLSessionBean implements MessageManager
 			n.setSentDate(new Date());
 	}
 
+	@PermitAll
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void countMessageSendFailure(Long messageId) throws MessageManagerException
+	{
+		if (messageId == null)
+			throw new IllegalArgumentException("Message id may not be null.");
+
+		MessageEntity n = this.entityManager.find(MessageEntityBean.class, messageId);
+		if (n.getSentDate() != null)
+			return; // no problem, already sent
+		else
+			n.setFailureCount(n.getFailureCount() + 1);
+	}
 }

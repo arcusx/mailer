@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.MessageManager;
+import com.arcusx.mailer.MessageManagerException;
 
 /**
  *
@@ -67,16 +68,17 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 
 	@PermitAll
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void sendMessage(Long messageId)
+	public boolean sendMessage(Long messageId)
 	{
 		try
 		{
 			Message n = this.messageManager.fetchMessage(messageId);
-
-			Collection<String> recipients = Arrays.asList(n.getRecipients().split(","));
-			sendEmail(recipients, n.getSender(), n.getSubject(), n.getBody());
-
-			this.messageManager.markMessageSent(messageId);
+			boolean sent = trySendMessage(n);
+			if (sent)
+				this.messageManager.markMessageSent(messageId);
+			else
+				this.messageManager.countMessageSendFailure(messageId);
+			return sent;
 		}
 		catch (Exception ex)
 		{
@@ -86,6 +88,26 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 			logger.error(msg, ex);
 
 			throw new EJBException(msg);
+		}
+	}
+
+	/**
+	 * @param messageId
+	 * @throws MessageManagerException
+	 * @throws Exception
+	 */
+	private boolean trySendMessage(Message n) throws MessageManagerException, Exception
+	{
+		try
+		{
+			Collection<String> recipients = Arrays.asList(n.getRecipients().split(","));
+			sendEmail(recipients, n.getSender(), n.getSubject(), n.getBody());
+			return true;
+		}
+		catch (Exception ex)
+		{
+			logger.warn("Sending message " + n.getMessageId() + " failed.", ex);
+			return false;
 		}
 	}
 

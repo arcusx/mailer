@@ -65,6 +65,7 @@ public class MailerServiceSLSessionBean implements MailerService
 			messageEntity.setRecipients(message.getRecipients());
 			messageEntity.setSubject(message.getSubject());
 			messageEntity.setBody(message.getBody());
+			messageEntity.setFailureCount(0);
 			this.entityManager.persist(messageEntity);
 		}
 		catch (Exception ex)

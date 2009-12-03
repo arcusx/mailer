@@ -59,6 +59,9 @@ public class MessageEntityBean implements MessageEntity
 	@Column(name = "sent_date", nullable = true)
 	private Date sentDate;
 
+	@Column(name = "failure_count", nullable = false)
+	private Integer failureCount;
+
 	public MessageEntityBean()
 	{
 	}
@@ -134,6 +137,19 @@ public class MessageEntityBean implements MessageEntity
 
 		MessageEntityBean other = (MessageEntityBean) otherObj;
 		return this.messageId != null && this.messageId.equals(other.messageId);
+	}
+
+	public int getFailureCount()
+	{
+		return this.failureCount.intValue();
+	}
+
+	public void setFailureCount(int failureCount)
+	{
+		if (failureCount < 0)
+			throw new IllegalArgumentException("Failure count may not be set < 0.");
+
+		this.failureCount = Integer.valueOf(failureCount);
 	}
 
 }
