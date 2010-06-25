@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE jboss-app>
+<!DOCTYPE jboss-app
+    PUBLIC "-//JBoss//DTD J2EE Application 4.2//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-app_4_2.dtd">
 
 <jboss-app>
 	<loader-repository>com.arcusx:loader=arcusx-mailer-service-ear</loader-repository>
