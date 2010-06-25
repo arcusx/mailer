@@ -19,7 +19,11 @@
   -->
 
 <!-- $Id$ -->
-
+<!--
+  <!DOCTYPE jboss PUBLIC
+      "-//JBoss//DTD JBOSS 4.2//EN"
+      "http://www.jboss.org/j2ee/dtd/jboss_4_2.dtd">
+-->
 <jboss xmlns:xsi="http://www.w3.org/2001/XMLSchema"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss_5_0.xsd" 
 	version="3.0">
