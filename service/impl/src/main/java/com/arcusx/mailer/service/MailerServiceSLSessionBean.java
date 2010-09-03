@@ -35,6 +35,8 @@ import com.arcusx.mailer.MailerService;
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.service.persistence.MessageEntity;
 import com.arcusx.mailer.service.persistence.MessageEntityBean;
+import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
+import com.arcusx.mailer.service.persistence.MessageRecipientEntityBean;
 
 /**
  *
@@ -62,7 +64,12 @@ public class MailerServiceSLSessionBean implements MailerService
 		{
 			MessageEntity messageEntity = new MessageEntityBean();
 			messageEntity.setSender(message.getSender());
-			messageEntity.setRecipients(message.getRecipients());
+			for (String recipient : message.getRecipients())
+			{
+				MessageRecipientEntity recipientEntity = new MessageRecipientEntityBean();
+				recipientEntity.setEmailAddress(recipient);
+				messageEntity.addRecipient(recipientEntity);
+			}
 			messageEntity.setSubject(message.getSubject());
 			messageEntity.setBody(message.getBody());
 			messageEntity.setFailureCount(0);

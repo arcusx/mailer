@@ -19,13 +19,20 @@
 
 package com.arcusx.mailer.service.persistence;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -47,8 +54,9 @@ public class MessageEntityBean implements MessageEntity
 	@Column(name = "sender", nullable = false)
 	private String sender;
 
-	@Column(name = "recipients", nullable = false)
-	private String recipients;
+	@OneToMany(fetch = FetchType.EAGER, targetEntity = MessageRecipientEntityBean.class, cascade = CascadeType.ALL)
+	@JoinColumn(name = "message_id", nullable = false, unique = false)
+	private Set<MessageRecipientEntity> recipients = new HashSet<MessageRecipientEntity>();
 
 	@Column(name = "subject", nullable = false)
 	private String subject;
@@ -91,14 +99,24 @@ public class MessageEntityBean implements MessageEntity
 		return this.messageId;
 	}
 
-	public String getRecipients()
+	public Set<MessageRecipientEntity> getRecipients()
 	{
-		return this.recipients;
+		return Collections.unmodifiableSet(this.recipients);
 	}
 
-	public void setRecipients(String recipients)
+	public void setRecipients(Set<MessageRecipientEntity> recipients)
 	{
-		this.recipients = recipients;
+		this.recipients = new HashSet<MessageRecipientEntity>(recipients);
+	}
+
+	public void removeRecipient(MessageRecipientEntity recipient)
+	{
+		this.recipients.remove(recipient);
+	}
+
+	public void addRecipient(MessageRecipientEntity recipient)
+	{
+		this.recipients.add(recipient);
 	}
 
 	public String getSubject()

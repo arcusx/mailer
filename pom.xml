@@ -12,8 +12,8 @@
   <name>arcusx-mailer</name>
   <description>arcusx-mailer</description>
   <scm>
-    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</connection>
-    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</developerConnection>
+    <connection>scm:svn:git://scm.arcusx.lan/srv/git/arcusx/mailer.git</connection>
+    <developerConnection>scm:svn:git://scm.arcusx.lan/srv/git/arcusx/mailer.git</developerConnection>
   </scm>
   <build>
     <pluginManagement>
@@ -30,7 +30,6 @@
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
-          <tagBase>svn://svn.arcusx.lan/repository/arcusx/mailer/tags</tagBase>
           <useReleaseProfile>true</useReleaseProfile>
         </configuration>
       </plugin>
@@ -42,6 +41,7 @@
     <module>service/ear</module>
     <module>batch/impl</module>
     <module>batch/ear</module>
+    <module>example</module>
   </modules>
   <dependencyManagement>
     <dependencies>

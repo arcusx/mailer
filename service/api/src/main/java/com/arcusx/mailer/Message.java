@@ -20,6 +20,9 @@
 package com.arcusx.mailer;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -34,7 +37,7 @@ public final class Message implements Serializable
 
 	private String sender;
 
-	private String recipients;
+	private Set<String> recipients = new HashSet<String>();
 
 	private String subject;
 
@@ -59,9 +62,9 @@ public final class Message implements Serializable
 		return this.sender;
 	}
 
-	public String getRecipients()
+	public Set<String> getRecipients()
 	{
-		return this.recipients;
+		return Collections.unmodifiableSet(this.recipients);
 	}
 
 	public String getSubject()
@@ -79,9 +82,19 @@ public final class Message implements Serializable
 		this.sender = sender;
 	}
 
-	public void setRecipients(String recipients)
+	public void setRecipients(Set<String> recipients)
 	{
-		this.recipients = recipients;
+		this.recipients = new HashSet<String>(recipients);
+	}
+
+	public void addRecipient(String recipient)
+	{
+		this.recipients.add(recipient);
+	}
+
+	public void removeRecipient(String recipient)
+	{
+		this.recipients.remove(recipient);
 	}
 
 	public void setSubject(String subject)
