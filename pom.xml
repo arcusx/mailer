@@ -3,7 +3,7 @@
   <parent>
     <artifactId>arcusx-parent</artifactId>
     <groupId>com.arcusx.parent</groupId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer</artifactId>
