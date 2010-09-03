@@ -56,20 +56,20 @@
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-service-api</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>${project.version}</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-service-impl</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>${project.version}</version>
         <type>ejb</type>
 	<scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.arcusx.mailer</groupId>
         <artifactId>arcusx-mailer-batch-impl</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>${project.version}</version>
         <type>ejb</type>
 	<scope>compile</scope>
       </dependency>
@@ -110,18 +110,18 @@
         <scope>provided</scope>
       </dependency>
 	<dependency>
-			<groupId>com.arcusx.3rdparty.org.jboss.jbossas</groupId>
-			<artifactId>jboss-ejb-libs</artifactId>
-			<type>pom</type>
-			<scope>provided</scope>
-	<version>4.2.0-GA</version>
-		</dependency>
+		<groupId>com.arcusx.3rdparty.org.jboss.jbossas</groupId>
+		<artifactId>jboss-ejb-libs</artifactId>
+		<type>pom</type>
+		<scope>provided</scope>
+		<version>4.2.0-GA</version>
+	</dependency>
 	<dependency>
             <artifactId>mail</artifactId>
             <groupId>javax.mail</groupId>
-	<version>1.4.1</version>
-	<scope>provided</scope>
+	    <version>1.4.1</version>
+	    <scope>provided</scope>
 	</dependency>
-</dependencies>
+     </dependencies>
   </dependencyManagement>
 </project>
