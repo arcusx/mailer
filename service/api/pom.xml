@@ -4,11 +4,11 @@
   <parent>
     <artifactId>arcusx-mailer</artifactId>
     <groupId>com.arcusx.mailer</groupId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer-service-api</artifactId>
-  <version>1.0.5-SNAPSHOT</version>
+  <version>1.0.5</version>
   <name>${artifactId}</name>
   <description>${artifactId}</description>
   <build />
