@@ -3,7 +3,7 @@
   <parent>
     <artifactId>arcusx-parent</artifactId>
     <groupId>com.arcusx.parent</groupId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer</artifactId>
@@ -12,8 +12,8 @@
   <name>arcusx-mailer</name>
   <description>arcusx-mailer</description>
   <scm>
-    <connection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</connection>
-    <developerConnection>scm:svn:svn://svn.arcusx.lan/repository/arcusx/mailer/trunk</developerConnection>
+    <connection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</connection>
+    <developerConnection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</developerConnection>
   </scm>
   <build>
     <pluginManagement>
@@ -27,12 +27,29 @@
       </plugins>
     </pluginManagement>
     <plugins>
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                    <groupId>org.apache.maven.scm</groupId>
+                    <artifactId>maven-scm-provider-gitexe</artifactId>
+			<version>1.4</version>
+                  </dependency>
+                </dependencies>
+            </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
-          <tagBase>svn://svn.arcusx.lan/repository/arcusx/mailer/tags</tagBase>
           <useReleaseProfile>true</useReleaseProfile>
         </configuration>
+                <dependencies>
+                  <dependency>
+                    <groupId>org.apache.maven.scm</groupId>
+                    <artifactId>maven-scm-provider-gitexe</artifactId>
+			<version>1.4</version>
+                  </dependency>
+                </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -42,6 +59,7 @@
     <module>service/ear</module>
     <module>batch/impl</module>
     <module>batch/ear</module>
+    <module>example</module>
   </modules>
   <dependencyManagement>
     <dependencies>

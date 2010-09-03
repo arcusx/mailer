@@ -22,7 +22,9 @@ package com.arcusx.mailer.service;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.security.PermitAll;
 import javax.ejb.Remote;
@@ -40,6 +42,7 @@ import com.arcusx.mailer.MessageManager;
 import com.arcusx.mailer.MessageManagerException;
 import com.arcusx.mailer.service.persistence.MessageEntity;
 import com.arcusx.mailer.service.persistence.MessageEntityBean;
+import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
 
 /**
  *
@@ -94,7 +97,12 @@ public class MessageManagerSLSessionBean implements MessageManager
 
 		Message messageData = new Message(messageEntity.getMessageId());
 		messageData.setBody(messageEntity.getBody());
-		messageData.setRecipients(messageEntity.getRecipients());
+		Set<String> recipients = new HashSet<String>();
+		for (MessageRecipientEntity recipientEntity : messageEntity.getRecipients())
+		{
+			recipients.add(recipientEntity.getEmailAddress());
+		}
+		messageData.setRecipients(recipients);
 		messageData.setSender(messageEntity.getSender());
 		messageData.setSubject(messageEntity.getSubject());
 		return messageData;

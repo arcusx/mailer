@@ -1,7 +1,9 @@
 <projectDescription>
-  <name>arcusx-mailer-service-api</name>
-  <comment>arcusx-mailer-service-api</comment>
-  <projects/>
+  <name>arcusx-mailer-example</name>
+  <comment>arcusx-mailer-example</comment>
+  <projects>
+    <project>arcusx-mailer-service-api</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

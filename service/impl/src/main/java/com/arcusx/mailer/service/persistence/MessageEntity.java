@@ -20,6 +20,7 @@
 package com.arcusx.mailer.service.persistence;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  *
@@ -38,9 +39,13 @@ public interface MessageEntity
 
 	void setSender(String sender);
 
-	String getRecipients();
+	Set<MessageRecipientEntity> getRecipients();
 
-	void setRecipients(String recipients);
+	void setRecipients(Set<MessageRecipientEntity> recipients);
+
+	void removeRecipient(MessageRecipientEntity recipient);
+
+	void addRecipient(MessageRecipientEntity recipient);
 
 	String getSubject();
 

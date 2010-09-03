@@ -19,9 +19,8 @@
 
 package com.arcusx.mailer.batch;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
@@ -100,8 +99,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	{
 		try
 		{
-			Collection<String> recipients = Arrays.asList(n.getRecipients().split(","));
-			sendEmail(recipients, n.getSender(), n.getSubject(), n.getBody());
+			sendEmail(n.getRecipients(), n.getSender(), n.getSubject(), n.getBody());
 			return true;
 		}
 		catch (Exception ex)
@@ -111,7 +109,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		}
 	}
 
-	private void sendEmail(Collection<String> recipients, String sender, String subject, String body) throws Exception
+	private void sendEmail(Set<String> recipients, String sender, String subject, String body) throws Exception
 	{
 		MimeMessage message = new MimeMessage(session);
 		message.setFrom(new InternetAddress(sender));
