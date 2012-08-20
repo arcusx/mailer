@@ -58,4 +58,8 @@ public interface MessageEntity
 	int getFailureCount();
 
 	void setFailureCount(int failureCount);
+	
+	Integer getType();
+
+	void setType(Integer type);
 }

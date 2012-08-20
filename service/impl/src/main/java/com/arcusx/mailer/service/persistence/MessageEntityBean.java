@@ -63,6 +63,9 @@ public class MessageEntityBean implements MessageEntity
 
 	@Column(name = "body", nullable = false)
 	private String body;
+	
+	@Column(name= "type", nullable = true)
+	private Integer type;
 
 	@Column(name = "sent_date", nullable = true)
 	private Date sentDate;
@@ -168,6 +171,16 @@ public class MessageEntityBean implements MessageEntity
 			throw new IllegalArgumentException("Failure count may not be set < 0.");
 
 		this.failureCount = Integer.valueOf(failureCount);
+	}
+
+	public Integer getType()
+	{
+		return type;
+	}
+
+	public void setType(Integer type)
+	{
+		this.type = type;
 	}
 
 }

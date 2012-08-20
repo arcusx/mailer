@@ -42,6 +42,8 @@ public final class Message implements Serializable
 	private String subject;
 
 	private String body;
+	
+	private String htmlBody;
 
 	public Message()
 	{
@@ -105,6 +107,16 @@ public final class Message implements Serializable
 	public void setBody(String body)
 	{
 		this.body = body;
+	}
+
+	public String getHtmlBody()
+	{
+		return htmlBody;
+	}
+
+	public void setHtmlBody(String htmlBody)
+	{
+		this.htmlBody = htmlBody;
 	}
 
 }

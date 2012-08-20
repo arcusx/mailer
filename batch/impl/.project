@@ -1,6 +1,6 @@
 <projectDescription>
   <name>arcusx-mailer-batch-impl</name>
-  <comment>arcusx-mailer-batch-impl</comment>
+  <comment>arcusx-mailer-batch-impl. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
     <project>arcusx-mailer-service-api</project>
   </projects>

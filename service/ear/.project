@@ -1,6 +1,6 @@
 <projectDescription>
   <name>arcusx-mailer-service-ear</name>
-  <comment>arcusx-mailer-service-ear</comment>
+  <comment>arcusx-mailer-service-ear. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects>
     <project>arcusx-mailer-service-api</project>
     <project>arcusx-mailer-service-impl</project>
