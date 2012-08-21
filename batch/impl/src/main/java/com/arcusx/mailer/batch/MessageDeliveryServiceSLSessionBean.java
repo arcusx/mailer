@@ -142,7 +142,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		message.setFrom(new InternetAddress(sender));
 		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
 		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
 		}
 		message.setSubject(subject);
 		message.setText(body);
@@ -159,7 +159,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		message.addHeader("Content-Transfer-Encoding", "7bit");
 		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
 		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
 		}
 		message.setSubject(subject);
 		message.setText(htmlBody, "ISO-8859-1", "html");
@@ -174,12 +174,11 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		message.setFrom(new InternetAddress(sender));
 		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
 		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
 		}
 		message.setSubject(subject);
-
 		MimeMultipart mp = new MimeMultipart();
-
+		mp.setSubType("alternative");
 		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
 		plainTextBodyPart.addHeader("Content-Type", "text/plain; charset=ISO-8859-1; format=flowed");
 		plainTextBodyPart.addHeader("Content-Transfer-Encoding", "7bit");

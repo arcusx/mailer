@@ -1,8 +1,5 @@
 <classpath>
-  <classpathentry kind="src" path="src/test/java" including="**/*.java"/>
-  <classpathentry kind="src" path="src/test/resources" excluding="**/*.java"/>
   <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
-  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
   <classpathentry kind="output" path="bin"/>
   <classpathentry kind="var" path="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0.jar" sourcepath="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/ejb3-persistence/4.2.0-GA/ejb3-persistence-4.2.0-GA.jar"/>
