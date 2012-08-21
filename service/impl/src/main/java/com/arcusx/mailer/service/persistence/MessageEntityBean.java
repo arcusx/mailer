@@ -63,9 +63,9 @@ public class MessageEntityBean implements MessageEntity
 
 	@Column(name = "body", nullable = false)
 	private String body;
-	
-	@Column(name= "type", nullable = true)
-	private Integer type;
+
+	@Column(name = "body_type", nullable = true)
+	private String bodyType;
 
 	@Column(name = "sent_date", nullable = true)
 	private Date sentDate;
@@ -173,14 +173,14 @@ public class MessageEntityBean implements MessageEntity
 		this.failureCount = Integer.valueOf(failureCount);
 	}
 
-	public Integer getType()
+	public String getBodyType()
 	{
-		return type;
+		return bodyType;
 	}
 
-	public void setType(Integer type)
+	public void setBodyType(String bodyType)
 	{
-		this.type = type;
+		this.bodyType = bodyType;
 	}
 
 }

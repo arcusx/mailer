@@ -30,10 +30,13 @@ import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
 
@@ -99,17 +102,41 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	{
 		try
 		{
-			sendEmail(n.getRecipients(), n.getSender(), n.getSubject(), n.getBody());
+			String body = n.getBody();
+			String htmlBody = n.getHtmlBody();
+			boolean hasPlainTextBody = body != null && body.trim().length() > 0;
+			boolean hasHtmlBody = htmlBody != null && htmlBody.trim().length() > 0;
+
+			MimeMessage message = null;
+			if (hasPlainTextBody && !hasHtmlBody)
+			{
+				message = createPlainTextEmail(n.getRecipients(), n.getSender(), n.getSubject(), body);
+			}
+			else if (!hasPlainTextBody && hasHtmlBody)
+			{
+				message = createHtmlOnlyEmail(n.getRecipients(), n.getSender(), n.getSubject(), htmlBody);
+			}
+			else if (hasPlainTextBody && hasHtmlBody)
+			{
+				message = createMultiPartEmail(n.getRecipients(), n.getSender(), n.getSubject(), body, htmlBody);
+			}
+			else
+			{
+				throw new IllegalArgumentException("Neither plain text body nor html body. Can't send empty mail.");
+			}
+
+			Transport.send(message);
 			return true;
 		}
 		catch (Exception ex)
 		{
-			logger.warn("Sending message " + n.getMessageId() + " failed.", ex);
+			logger.warn("Creating/Sending message " + n.getMessageId() + " failed.", ex);
 			return false;
 		}
 	}
 
-	private void sendEmail(Set<String> recipients, String sender, String subject, String body) throws Exception
+	private MimeMessage createPlainTextEmail(Set<String> recipients, String sender, String subject, String body)
+			throws MessagingException
 	{
 		MimeMessage message = new MimeMessage(session);
 		message.setFrom(new InternetAddress(sender));
@@ -119,6 +146,57 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		}
 		message.setSubject(subject);
 		message.setText(body);
-		Transport.send(message);
+
+		return message;
+	}
+
+	private MimeMessage createHtmlOnlyEmail(Set<String> recipients, String sender, String subject, String htmlBody)
+			throws MessagingException
+	{
+		MimeMessage message = new MimeMessage(session);
+		message.setFrom(new InternetAddress(sender));
+		message.addHeader("Content-Type", "text/html; charset=ISO-8859-1");
+		message.addHeader("Content-Transfer-Encoding", "7bit");
+		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
+		{
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+		}
+		message.setSubject(subject);
+		message.setText(htmlBody, "ISO-8859-1", "html");
+
+		return message;
+	}
+
+	private MimeMessage createMultiPartEmail(Set<String> recipients, String sender, String subject,
+			String plainTextBody, String htmlBody) throws MessagingException
+	{
+		MimeMessage message = new MimeMessage(session);
+		message.setFrom(new InternetAddress(sender));
+		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
+		{
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress((String) iter.next()));
+		}
+		message.setSubject(subject);
+
+		MimeMultipart mp = new MimeMultipart();
+
+		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
+		plainTextBodyPart.addHeader("Content-Type", "text/plain; charset=ISO-8859-1; format=flowed");
+		plainTextBodyPart.addHeader("Content-Transfer-Encoding", "7bit");
+		// FIXME convert to iso8859?
+		plainTextBodyPart.setText(plainTextBody, "ISO-8859-1");
+
+		MimeBodyPart htmlBodyPart = new MimeBodyPart();
+		htmlBodyPart.addHeader("Content-Type", "text/html; charset=ISO-8859-1");
+		htmlBodyPart.addHeader("Content-Transfer-Encoding", "7bit");
+		// FIXME convert to iso8859?
+		htmlBodyPart.setText(htmlBody, "ISO-8859-1", "html");
+
+		mp.addBodyPart(plainTextBodyPart);
+		mp.addBodyPart(htmlBodyPart);
+
+		message.setContent(mp);
+
+		return message;
 	}
 }

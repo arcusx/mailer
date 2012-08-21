@@ -37,6 +37,7 @@ import com.arcusx.mailer.service.persistence.MessageEntity;
 import com.arcusx.mailer.service.persistence.MessageEntityBean;
 import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
 import com.arcusx.mailer.service.persistence.MessageRecipientEntityBean;
+import com.arcusx.mailer.xml.MessageToXmlTransformer;
 
 /**
  *
@@ -71,7 +72,10 @@ public class MailerServiceSLSessionBean implements MailerService
 				messageEntity.addRecipient(recipientEntity);
 			}
 			messageEntity.setSubject(message.getSubject());
-			messageEntity.setBody(message.getBody());
+			MessageToXmlTransformer messageTransformer = new MessageToXmlTransformer();
+			String messageBody = messageTransformer.transform(message);
+			messageEntity.setBody(messageBody);
+			messageEntity.setBodyType(MessageEntity.BodyType.XML.name());
 			messageEntity.setFailureCount(0);
 			this.entityManager.persist(messageEntity);
 		}

@@ -29,6 +29,10 @@ import java.util.Set;
  */
 public interface MessageEntity
 {
+	enum BodyType {
+		PLAIN, XML;
+	}
+
 	Long getMessageId();
 
 	Date getSentDate();
@@ -58,8 +62,8 @@ public interface MessageEntity
 	int getFailureCount();
 
 	void setFailureCount(int failureCount);
-	
-	Integer getType();
 
-	void setType(Integer type);
+	String getBodyType();
+
+	void setBodyType(String bodyType);
 }

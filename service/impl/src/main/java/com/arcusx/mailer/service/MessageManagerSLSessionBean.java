@@ -43,6 +43,7 @@ import com.arcusx.mailer.MessageManagerException;
 import com.arcusx.mailer.service.persistence.MessageEntity;
 import com.arcusx.mailer.service.persistence.MessageEntityBean;
 import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
+import com.arcusx.mailer.xml.XmlToMessageTransformer;
 
 /**
  *
@@ -96,7 +97,25 @@ public class MessageManagerSLSessionBean implements MessageManager
 		MessageEntity messageEntity = (MessageEntity) messages.get(0);
 
 		Message messageData = new Message(messageEntity.getMessageId());
-		messageData.setBody(messageEntity.getBody());
+
+		String bodyType = messageEntity.getBodyType();
+		if (MessageEntity.BodyType.XML.name().equals(bodyType))
+		{
+			XmlToMessageTransformer messageTransformer = new XmlToMessageTransformer();
+			try
+			{
+				messageTransformer.transform(messageEntity.getBody(), messageData);
+			}
+			catch (Exception e)
+			{
+				String msg = "Message body could not be transformed.";
+				throw new MessageManagerException(msg);
+			}
+		}
+		else
+		{
+			messageData.setBody(messageEntity.getBody());
+		}
 		Set<String> recipients = new HashSet<String>();
 		for (MessageRecipientEntity recipientEntity : messageEntity.getRecipients())
 		{
