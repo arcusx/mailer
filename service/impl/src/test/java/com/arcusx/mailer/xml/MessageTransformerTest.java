@@ -83,9 +83,12 @@ public class MessageTransformerTest
 
 		Base64 base64 = new Base64();
 		final String encoded = base64.encodeAsString(new byte[] { 10});
+		final String encoded2 = base64.encodeAsString(new byte[] { 20});
 
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mail><Body><Plain><Text>Test Plain Body</Text></Plain><Html><Text>&lt;html&gt;&lt;body&gt;&lt;h1&gt;Headline&lt;/h1&gt; Test HTML Body&lt;/body&gt;&lt;/html&gt;</Text><Images><Image name=\"/de/logo.png\" type=\"image/png\">"
-				+ encoded + "</Image></Images></Html></Body></Mail>";
+				+ encoded + "</Image>" +
+						"<Image name=\"/de/acknowledge.png\" type=\"image/png\">"
+				+ encoded2 + "</Image></Images></Html></Body></Mail>";
 		XmlToMessageTransformer messageTransformer = new XmlToMessageTransformer();
 
 		// when
@@ -95,13 +98,20 @@ public class MessageTransformerTest
 		assertEquals("Test Plain Body", message.getBody());
 		assertEquals("<html><body><h1>Headline</h1> Test HTML Body</body></html>", message.getHtmlBody().getHtml());
 		final List<MessageImage> images = message.getHtmlBody().getImages();
-		assertEquals(1, images.size());
+		assertEquals(2, images.size());
 		final MessageImage image = images.get(0);
 		assertEquals("/de/logo.png", image.identifier);
 		assertEquals("image/png", image.type);
 		assertNotNull(image.data);
 		assertEquals(1, image.data.length);
 		assertEquals(10, image.data[0]);
+		
+		final MessageImage image2 = images.get(1);
+		assertEquals("/de/acknowledge.png", image2.identifier);
+		assertEquals("image/png", image2.type);
+		assertNotNull(image2.data);
+		assertEquals(1, image2.data.length);
+		assertEquals(20, image2.data[0]);
 	}
 
 }

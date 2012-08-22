@@ -214,19 +214,25 @@ public class XmlToMessageTransformer
 				{
 					final StartElement imageElement = event.asStartElement();
 					parsingImage = isElementWithName(imageElement, "Image");;
-					final Attribute nameAttr = imageElement.getAttributeByName(new QName("name"));
-					final Attribute typeAttr = imageElement.getAttributeByName(new QName("type"));
-					identifier = nameAttr.getValue();
-					type = typeAttr.getValue();
+					if (parsingImage)
+					{
+						final Attribute nameAttr = imageElement.getAttributeByName(new QName("name"));
+						final Attribute typeAttr = imageElement.getAttributeByName(new QName("type"));
+						identifier = nameAttr.getValue();
+						type = typeAttr.getValue();
+					}
 				}
 				else if (event.isEndElement())
 				{
 					if (isElementWithName(event.asEndElement(), "Image"))
 					{
-						parsingImage = false;
 						final Base64 base64 = new Base64();
 						final byte[] decode = base64.decode(data);
 						html.addInlineImage(identifier, type, decode);
+						identifier = null;
+						type = null;
+						data = "";
+						parsingImage = false;
 					}
 					else if (isElementWithName(event.asEndElement(), "Images"))
 					{
