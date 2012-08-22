@@ -6,6 +6,7 @@
   <classpathentry kind="var" path="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0.jar" sourcepath="M2_REPO/javax/persistence/persistence-api/1.0/persistence-api-1.0-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/commons/arcusx-commons-xml/1.1.1/arcusx-commons-xml-1.1.1.jar" sourcepath="M2_REPO/com/arcusx/commons/arcusx-commons-xml/1.1.1/arcusx-commons-xml-1.1.1-sources.jar"/>
   <classpathentry kind="src" path="/arcusx-mailer-service-api"/>
+  <classpathentry kind="var" path="M2_REPO/commons-codec/commons-codec/1.6/commons-codec-1.6.jar" sourcepath="M2_REPO/commons-codec/commons-codec/1.6/commons-codec-1.6-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/ejb3-persistence/4.2.0-GA/ejb3-persistence-4.2.0-GA.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/jboss-all-client/4.2.0-GA/jboss-all-client-4.2.0-GA.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/arcusx/3rdparty/org/jboss/jbossas/jboss-annotations-ejb3/4.2.0-GA/jboss-annotations-ejb3-4.2.0-GA.jar"/>

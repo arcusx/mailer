@@ -19,7 +19,6 @@
 
 package com.arcusx.mailer.batch;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -30,16 +29,13 @@ import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
 
+import com.arcusx.mailer.HtmlMessageBody;
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.MessageManager;
 import com.arcusx.mailer.MessageManagerException;
@@ -102,28 +98,15 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	{
 		try
 		{
-			String body = n.getBody();
-			String htmlBody = n.getHtmlBody();
-			boolean hasPlainTextBody = body != null && body.trim().length() > 0;
-			boolean hasHtmlBody = htmlBody != null && htmlBody.trim().length() > 0;
+			final String sender = n.getSender();
+			final Set<String> recipients = n.getRecipients();
+			final String subject = n.getSubject();
+			final String plainTextBody = n.getBody();
+			final HtmlMessageBody htmlBody = n.getHtmlBody();
 
-			MimeMessage message = null;
-			if (hasPlainTextBody && !hasHtmlBody)
-			{
-				message = createPlainTextEmail(n.getRecipients(), n.getSender(), n.getSubject(), body);
-			}
-			else if (!hasPlainTextBody && hasHtmlBody)
-			{
-				message = createHtmlOnlyEmail(n.getRecipients(), n.getSender(), n.getSubject(), htmlBody);
-			}
-			else if (hasPlainTextBody && hasHtmlBody)
-			{
-				message = createMultiPartEmail(n.getRecipients(), n.getSender(), n.getSubject(), body, htmlBody);
-			}
-			else
-			{
-				throw new IllegalArgumentException("Neither plain text body nor html body. Can't send empty mail.");
-			}
+			MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, plainTextBody,
+					htmlBody);;
+			MimeMessage message = builder.createMimeMessage();
 
 			Transport.send(message);
 			return true;
@@ -135,67 +118,4 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		}
 	}
 
-	private MimeMessage createPlainTextEmail(Set<String> recipients, String sender, String subject, String body)
-			throws MessagingException
-	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
-		message.setText(body);
-
-		return message;
-	}
-
-	private MimeMessage createHtmlOnlyEmail(Set<String> recipients, String sender, String subject, String htmlBody)
-			throws MessagingException
-	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		message.addHeader("Content-Type", "text/html; charset=ISO-8859-1");
-		message.addHeader("Content-Transfer-Encoding", "7bit");
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
-		message.setText(htmlBody, "ISO-8859-1", "html");
-
-		return message;
-	}
-
-	private MimeMessage createMultiPartEmail(Set<String> recipients, String sender, String subject,
-			String plainTextBody, String htmlBody) throws MessagingException
-	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
-		MimeMultipart mp = new MimeMultipart();
-		mp.setSubType("alternative");
-		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
-		plainTextBodyPart.addHeader("Content-Type", "text/plain; charset=ISO-8859-1; format=flowed");
-		plainTextBodyPart.addHeader("Content-Transfer-Encoding", "7bit");
-		// FIXME convert to iso8859?
-		plainTextBodyPart.setText(plainTextBody, "ISO-8859-1");
-
-		MimeBodyPart htmlBodyPart = new MimeBodyPart();
-		htmlBodyPart.addHeader("Content-Type", "text/html; charset=ISO-8859-1");
-		htmlBodyPart.addHeader("Content-Transfer-Encoding", "7bit");
-		// FIXME convert to iso8859?
-		htmlBodyPart.setText(htmlBody, "ISO-8859-1", "html");
-
-		mp.addBodyPart(plainTextBodyPart);
-		mp.addBodyPart(htmlBodyPart);
-
-		message.setContent(mp);
-
-		return message;
-	}
 }

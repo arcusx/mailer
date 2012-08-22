@@ -28,10 +28,14 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.codec.binary.Base64;
+
+import com.arcusx.mailer.HtmlMessageBody;
 import com.arcusx.mailer.Message;
 
 /**
@@ -41,11 +45,11 @@ import com.arcusx.mailer.Message;
  */
 public class XmlToMessageTransformer
 {
-	private PlainParsing plainState = new PlainParsing();
+	private final PlainParsing plainState = new PlainParsing();
 
-	private HtmlParsing htmlState = new HtmlParsing();
+	private final HtmlParsing htmlState = new HtmlParsing();
 
-	private RootParsing rootState = new RootParsing();
+	private final RootParsing rootState = new RootParsing();
 
 	private ParsingState state = rootState;
 
@@ -164,36 +168,103 @@ public class XmlToMessageTransformer
 
 	class HtmlParsing extends ParsingState
 	{
-		private boolean readHtmlMessage;
+		private final TextParsing textState = new TextParsing();
 
-		private String data = "";
+		private final ImagesParsing imagesState = new ImagesParsing();
+
+		private ParsingState subState;
+
+		private HtmlMessageBody html = null;
+
+		public class TextParsing extends ParsingState
+		{
+			String data = "";
+
+			@Override
+			public void process(XMLEvent event, Message message)
+			{
+				if (event.isCharacters())
+				{
+					String characters = event.asCharacters().getData();
+					data += characters;
+				}
+				else if (event.isEndElement())
+				{
+					if (isElementWithName(event.asEndElement(), "Text"))
+					{
+						html = new HtmlMessageBody(data);
+						subState = null;
+					}
+				}
+			}
+		}
+
+		public class ImagesParsing extends ParsingState
+		{
+
+			private boolean parsingImage = false;
+			private String data = "";
+			private String type;
+			private String identifier;
+
+			@Override
+			public void process(XMLEvent event, Message message)
+			{
+				if (event.isStartElement())
+				{
+					final StartElement imageElement = event.asStartElement();
+					parsingImage = isElementWithName(imageElement, "Image");;
+					final Attribute nameAttr = imageElement.getAttributeByName(new QName("name"));
+					final Attribute typeAttr = imageElement.getAttributeByName(new QName("type"));
+					identifier = nameAttr.getValue();
+					type = typeAttr.getValue();
+				}
+				else if (event.isEndElement())
+				{
+					if (isElementWithName(event.asEndElement(), "Image"))
+					{
+						parsingImage = false;
+						final Base64 base64 = new Base64();
+						final byte[] decode = base64.decode(data);
+						html.addInlineImage(identifier, type, decode);
+					}
+					else if (isElementWithName(event.asEndElement(), "Images"))
+					{
+						subState = null;
+					}
+				}
+				else if (event.isCharacters() && parsingImage)
+				{
+					String characters = event.asCharacters().getData();
+					data += characters;
+				}
+			}
+		}
 
 		@Override
 		public void process(XMLEvent event, Message message)
 		{
-			if (event.isStartElement())
+			if (subState != null)
 			{
-				if (isElementWithName(event.asStartElement(), "Text"))
+				subState.process(event, message);
+			}
+			else if (event.isStartElement())
+			{
+				boolean isTextElement = isElementWithName(event.asStartElement(), "Text");
+				boolean isImagesElement = isElementWithName(event.asStartElement(), "Images");
+				if (isTextElement)
 				{
-					readHtmlMessage = true;
+					subState = textState;
+				}
+				else if (isImagesElement)
+				{
+					subState = imagesState;
 				}
 			}
-			else if (event.isEndElement())
+			else if (isElementWithName(event.asEndElement(), "Html"))
 			{
-				if (isElementWithName(event.asEndElement(), "Text"))
-				{
-					readHtmlMessage = false;
-				}
-				else if (isElementWithName(event.asEndElement(), "Html"))
-				{
-					state = rootState;
-					message.setHtmlBody(data);
-				}
-			}
-			else if (event.isCharacters() && readHtmlMessage)
-			{
-				String characters = event.asCharacters().getData();
-				data += characters;
+				state = rootState;
+				message.setHtmlBody(html);
 			}
 		}
 	}

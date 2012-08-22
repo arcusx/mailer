@@ -23,16 +23,20 @@
 package com.arcusx.mailer.xml;
 
 import java.io.StringWriter;
+import java.util.List;
 
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.codec.binary.Base64;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
+import com.arcusx.mailer.HtmlMessageBody;
 import com.arcusx.mailer.Message;
+import com.arcusx.mailer.MessageImage;
 
 /**
  * Created on Aug 20, 2012.
@@ -71,9 +75,27 @@ public class MessageToXmlTransformer
 	{
 		cHandler.startElement(uri, "Html", "Html", new AttributesImpl());
 		cHandler.startElement(uri, "Text", "Text", new AttributesImpl());
-		char[] ch = message.getHtmlBody().toCharArray();
+		final HtmlMessageBody htmlBody = message.getHtmlBody();
+		final String html = htmlBody.getHtml();
+		char[] ch = html.toCharArray();
 		cHandler.characters(ch, 0, ch.length);
 		cHandler.endElement(uri, "Text", "Text");
+
+		cHandler.startElement(uri, "Images", "Images", new AttributesImpl());
+		final List<MessageImage> images = htmlBody.getImages();
+		Base64 encoder = new Base64();
+		for (MessageImage image : images)
+		{
+			AttributesImpl attributesImpl = new AttributesImpl();
+			attributesImpl.addAttribute(uri, "name", "name", "", image.identifier);
+			attributesImpl.addAttribute(uri, "type", "type", "", image.type);
+			cHandler.startElement(uri, "Image", "Image", attributesImpl);
+			final String encodedImage = encoder.encodeAsString(image.data);
+			cHandler.characters(encodedImage.toCharArray(), 0, encodedImage.length());
+			cHandler.endElement(uri, "Image", "Image");
+		}
+		cHandler.endElement(uri, "Images", "Images");
+
 		cHandler.endElement(uri, "Html", "Html");
 	}
 
