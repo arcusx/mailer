@@ -4,6 +4,7 @@
 
 package com.arcusx.mailer.batch;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -122,27 +123,34 @@ public class MimeMessageBuilder
 		message.setSubject(subject);
 
 		MimeBodyPart plainTextBodyPart = createPlainTextBodyPart();
-		MimeBodyPart relatedMultipartBody = createHtmlRelatedMultipartBodyPart();
+		MimeBodyPart htmlBodyPart = createHtmlRelatedMultipartBodyPart();
 
 		MimeMultipart alternativeMultipart = new MimeMultipart();
 		alternativeMultipart.setSubType("alternative");
 
 		alternativeMultipart.addBodyPart(plainTextBodyPart);
-		alternativeMultipart.addBodyPart(relatedMultipartBody);
+		alternativeMultipart.addBodyPart(htmlBodyPart);
 
-		message.setContent(alternativeMultipart);
+		MimeBodyPart alternativeMultipartBodyPart = new MimeBodyPart();
+		alternativeMultipartBodyPart.setContent(alternativeMultipart);
+
+		MimeMultipart relatedMultipart = new MimeMultipart();
+		relatedMultipart.setSubType("related");
+		relatedMultipart.addBodyPart(alternativeMultipartBodyPart);
+		
+		List<MimeBodyPart> createImageBodyParts = createImageBodyParts();
+		for (MimeBodyPart mimeBodyPart : createImageBodyParts)
+		{
+			relatedMultipart.addBodyPart(mimeBodyPart);
+		}
+
+		message.setContent(relatedMultipart);
 
 		return message;
 	}
 
 	private MimeBodyPart createHtmlRelatedMultipartBodyPart() throws MessagingException
 	{
-		MimeMultipart relatedMultipart = new MimeMultipart();
-		relatedMultipart.setSubType("related");
-
-		MimeBodyPart relatedMultipartBody = new MimeBodyPart();
-		relatedMultipartBody.setContent(relatedMultipart);
-
 		MimeBodyPart htmlBodyPart = new MimeBodyPart();
 		htmlBodyPart.addHeader("Content-Type", "text/html; charset=UTF-8");
 		String html = htmlBody.getHtml();
@@ -152,17 +160,22 @@ public class MimeMessageBuilder
 			html = html.replace(image.identifier, "cid:" + image.identifier);
 		}
 		htmlBodyPart.setText(html, "UTF-8", "html");
-		relatedMultipart.addBodyPart(htmlBodyPart);
+		return htmlBodyPart;
+	}
 
+	private List<MimeBodyPart> createImageBodyParts() throws MessagingException
+	{
+		List<MimeBodyPart> imageBodyParts = new ArrayList<MimeBodyPart>();
+		final List<MessageImage> images = htmlBody.getImages();
 		for (MessageImage image : images)
 		{
 			MimeBodyPart imageBodyPart = new MimeBodyPart();
 			imageBodyPart.setDataHandler(new DataHandler(image.data, image.type));
 			imageBodyPart.setHeader("Content-ID", image.identifier);
 			imageBodyPart.setDisposition(Part.INLINE);
-			relatedMultipart.addBodyPart(imageBodyPart);
+			imageBodyParts.add(imageBodyPart);
 		}
-		return relatedMultipartBody;
+		return imageBodyParts;
 	}
 
 	private MimeBodyPart createPlainTextBodyPart() throws MessagingException

@@ -144,7 +144,7 @@ public class MimeMessageBuilderTest
 		assertEquals(recipients.size(), recipientAddresses.length);
 
 		final DataHandler dataHandler = message.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/alternative"));
+		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
 		Multipart content = (Multipart) dataHandler.getContent();
 		assertNotNull(content);
 	}
@@ -178,30 +178,31 @@ public class MimeMessageBuilderTest
 		assertEquals(recipients.size(), recipientAddresses.length);
 
 		DataHandler dataHandler = message.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/alternative"));
+		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
 		Multipart content = (Multipart) dataHandler.getContent();
 		assertNotNull(content);
 		assertEquals(2, content.getCount());
 
-		final BodyPart plainTextPart = content.getBodyPart(0);
+		final BodyPart alternativeMultipartBodyPart = content.getBodyPart(0);
+		dataHandler = alternativeMultipartBodyPart.getDataHandler();
+		assertTrue(dataHandler.getContentType().startsWith("multipart/alternative"));
+		Multipart alternativeMultipart = (Multipart) dataHandler.getContent();
+		assertNotNull(alternativeMultipart);
+		assertEquals(2, alternativeMultipart.getCount());
+
+		final BodyPart plainTextPart = alternativeMultipart.getBodyPart(0);
 		assertNotNull(plainTextPart);
 		dataHandler = plainTextPart.getDataHandler();
 		assertEquals("text/plain; charset=UTF-8", dataHandler.getContentType());
 		assertEquals(plainTextBody, dataHandler.getContent());
 
-		final BodyPart relatedMultipartBodyPart = content.getBodyPart(1);
-		dataHandler = relatedMultipartBodyPart.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
-		Multipart relatedMultipart = (Multipart) dataHandler.getContent();
-		assertNotNull(relatedMultipart);
-		assertEquals(2, relatedMultipart.getCount());
 
-		final BodyPart htmlPart = relatedMultipart.getBodyPart(0);
+		final BodyPart htmlPart = alternativeMultipart.getBodyPart(1);
 		dataHandler = htmlPart.getDataHandler();
 		assertEquals("text/html; charset=UTF-8", dataHandler.getContentType());
 		assertEquals("<html><body><img src=\"cid:/de/logo.png\"/>htmlText</body></html>", dataHandler.getContent());
 
-		final BodyPart imagePart = relatedMultipart.getBodyPart(1);
+		final BodyPart imagePart = content.getBodyPart(1);
 		dataHandler = imagePart.getDataHandler();
 		assertEquals("inline", imagePart.getDisposition());
 		final String[] header = imagePart.getHeader("Content-ID");
