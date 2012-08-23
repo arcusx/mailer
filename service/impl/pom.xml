@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>arcusx-mailer</artifactId>
 		<groupId>com.arcusx.mailer</groupId>
-		<version>1.0.6</version>
+		<version>1.0.7-SNAPSHOT</version>
 	</parent>
 	<groupId>com.arcusx.mailer</groupId>
 	<artifactId>arcusx-mailer-service-impl</artifactId>
-	<version>1.0.6</version>
+	<version>1.0.7-SNAPSHOT</version>
 	<name>${artifactId}</name>
 	<packaging>ejb</packaging>
 	<description>${artifactId}</description>
