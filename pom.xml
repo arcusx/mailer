@@ -7,14 +7,15 @@
 	</parent>
 	<groupId>com.arcusx.mailer</groupId>
 	<artifactId>arcusx-mailer</artifactId>
-	<version>1.0.7-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>arcusx-mailer</name>
 	<description>arcusx-mailer</description>
 	<scm>
 		<connection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</connection>
 		<developerConnection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</developerConnection>
-	</scm>
+	  <tag>arcusx-mailer-1.1.0</tag>
+  </scm>
 	<build>
 		<pluginManagement>
 			<plugins>
