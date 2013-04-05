@@ -32,7 +32,7 @@ public interface MessageManager
 
 	List<Long> fetchUndeliveredMessageIds() throws MessageManagerException;
 
-	Message fetchMessage(Long messageId) throws MessageManagerException;
+	MimeMessageData fetchMessage(Long messageId) throws MessageManagerException;
 
 	void markMessageSent(Long messageId) throws MessageManagerException;
 

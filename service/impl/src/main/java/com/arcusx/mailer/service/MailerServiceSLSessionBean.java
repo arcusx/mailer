@@ -34,10 +34,7 @@ import com.arcusx.mailer.MailerException;
 import com.arcusx.mailer.MailerService;
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.service.persistence.MessageEntity;
-import com.arcusx.mailer.service.persistence.MessageEntityBean;
 import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
-import com.arcusx.mailer.service.persistence.MessageRecipientEntityBean;
-import com.arcusx.mailer.xml.MessageToXmlTransformer;
 
 /**
  *
@@ -63,19 +60,15 @@ public class MailerServiceSLSessionBean implements MailerService
 	{
 		try
 		{
-			MessageEntity messageEntity = new MessageEntityBean();
-			messageEntity.setSender(message.getSender());
-			for (String recipient : message.getRecipients())
-			{
-				MessageRecipientEntity recipientEntity = new MessageRecipientEntityBean();
-				recipientEntity.setEmailAddress(recipient);
-				messageEntity.addRecipient(recipientEntity);
-			}
-			messageEntity.setSubject(message.getSubject());
-			MessageToXmlTransformer messageTransformer = new MessageToXmlTransformer();
-			String messageBody = messageTransformer.transform(message);
-			messageEntity.setBody(messageBody);
-			messageEntity.setBodyType(MessageEntity.BodyType.XML.name());
+			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(), message.getReplyTo(), message.getSubject(),
+					message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
+			String mimeMessageText = new String(mimeMessageBytes, "ASCII");
+
+			MessageEntity messageEntity = new MessageEntity();
+			messageEntity.setSender("*sender in body*"); // for compatibility
+			messageEntity.setSubject("*subject in body*"); // for compatibility
+			messageEntity.setBody(mimeMessageText);
+			messageEntity.setBodyType(MessageEntity.BodyType.MIME);
 			messageEntity.setFailureCount(0);
 			this.entityManager.persist(messageEntity);
 		}

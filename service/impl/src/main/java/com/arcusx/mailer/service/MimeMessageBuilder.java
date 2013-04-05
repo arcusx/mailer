@@ -2,8 +2,10 @@
  * 
  */
 
-package com.arcusx.mailer.batch;
+package com.arcusx.mailer.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -27,39 +30,41 @@ import com.arcusx.mailer.MessageImage;
  */
 public class MimeMessageBuilder
 {
-	private final Session session;
 	private final String sender;
 	private final Set<String> recipients;
+	private final String replyTo;
 	private final String subject;
 	private final String plainTextBody;
 	private final HtmlMessageBody htmlBody;
 
-	public MimeMessageBuilder(Session session, String sender, Set<String> recipients, String subject,
-			String plainTextBody)
+	public MimeMessageBuilder(String sender, Set<String> recipients, String replyTo, String subject, String plainTextBody, HtmlMessageBody htmlBody)
 	{
-		this(session, sender, recipients, subject, plainTextBody, null);
-	}
-
-	public MimeMessageBuilder(Session session, String sender, Set<String> recipients, String subject,
-			HtmlMessageBody htmlBody)
-	{
-		this(session, sender, recipients, subject, null, htmlBody);
-	}
-
-	public MimeMessageBuilder(Session session, String sender, Set<String> recipients, String subject,
-			String plainTextBody, HtmlMessageBody htmlBody)
-	{
-		super();
-		this.session = session;
 		this.sender = sender;
 		this.recipients = recipients;
+		this.replyTo = replyTo;
 		this.subject = subject;
 		this.plainTextBody = plainTextBody;
 		this.htmlBody = htmlBody;
 	}
 
+	public byte[] createMimeMessageAsBytes() throws MessagingException, IOException
+	{
+		MimeMessage mimeMessage = createMimeMessage();
+		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+		mimeMessage.writeTo(bytesOut);
+		bytesOut.close();
+		return bytesOut.toByteArray();
+	}
+
 	public MimeMessage createMimeMessage() throws MessagingException
 	{
+		if (this.sender == null)
+			throw new IllegalArgumentException("Sender is null.");
+		if (this.subject == null)
+			throw new IllegalArgumentException("Subject is null.");
+		if (this.plainTextBody == null && this.htmlBody == null)
+			throw new IllegalArgumentException("Neither plain nor html body is set.");
+
 		MimeMessage message = null;
 
 		boolean hasPlainTextBody = plainTextBody != null && plainTextBody.trim().length() > 0;
@@ -85,13 +90,8 @@ public class MimeMessageBuilder
 
 	private MimeMessage createPlainTextEmail() throws MessagingException
 	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
+		MimeMessage message = new MimeMessage((Session) null);
+		fillAddressesAndSubject(message);
 		message.setText(plainTextBody, "UTF-8");
 
 		return message;
@@ -99,14 +99,9 @@ public class MimeMessageBuilder
 
 	private MimeMessage createHtmlOnlyEmail() throws MessagingException
 	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
+		MimeMessage message = new MimeMessage((Session) null);
+		fillAddressesAndSubject(message);
 		message.addHeader("Content-Type", "text/html; charset=UTF-8");
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
 		message.setText(htmlBody.getHtml(), "UTF-8", "html");
 
 		return message;
@@ -114,13 +109,8 @@ public class MimeMessageBuilder
 
 	private MimeMessage createMultiPartEmail() throws MessagingException
 	{
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
-		}
-		message.setSubject(subject);
+		MimeMessage message = new MimeMessage((Session) null);
+		fillAddressesAndSubject(message);
 
 		MimeBodyPart plainTextBodyPart = createPlainTextBodyPart();
 		MimeBodyPart htmlBodyPart = createHtmlRelatedMultipartBodyPart();
@@ -137,7 +127,7 @@ public class MimeMessageBuilder
 		MimeMultipart relatedMultipart = new MimeMultipart();
 		relatedMultipart.setSubType("related");
 		relatedMultipart.addBodyPart(alternativeMultipartBodyPart);
-		
+
 		List<MimeBodyPart> createImageBodyParts = createImageBodyParts();
 		for (MimeBodyPart mimeBodyPart : createImageBodyParts)
 		{
@@ -186,4 +176,20 @@ public class MimeMessageBuilder
 		return plainTextBodyPart;
 	}
 
+	private void fillAddressesAndSubject(MimeMessage message) throws MessagingException, AddressException
+	{
+		message.setFrom(new InternetAddress(sender));
+
+		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
+		{
+			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
+		}
+
+		message.setSubject(subject);
+
+		if (this.replyTo != null)
+		{
+			message.setReplyTo(new InternetAddress[] { new InternetAddress(this.replyTo)});
+		}
+	}
 }

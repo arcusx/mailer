@@ -19,14 +19,66 @@
 
 package com.arcusx.mailer.service.persistence;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
 /**
- * A message recipient.
- * 
+ * @deprecated Stored in MIME body.
  * @author conni
  */
-public interface MessageRecipientEntity
+@Entity(name = "MessageRecipient")
+@Table(name = "mailer.message_recipient")
+@SequenceGenerator(name = "message_recipient_id_seq", sequenceName = "mailer.message_recipient_seq", allocationSize = 1)
+@Deprecated
+public class MessageRecipientEntity
 {
-	void setEmailAddress(String emailAddress);
+	@Id
+	@Column(name = "message_recipient_id", unique = true, nullable = false)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "message_recipient_id_seq")
+	private Long messageRecipientId;
 
-	String getEmailAddress();
+	@Column(name = "email_address", nullable = false)
+	private String emailAddress;
+
+	public MessageRecipientEntity()
+	{
+	}
+
+	public Long getMessageRecipientId()
+	{
+		return messageRecipientId;
+	}
+
+	public void setEmailAddress(String emailAddress)
+	{
+		this.emailAddress = emailAddress;
+	}
+
+	public String getEmailAddress()
+	{
+		return emailAddress;
+	}
+
+	@Override
+	public boolean equals(Object otherObj)
+	{
+		if (otherObj == this)
+			return true;
+
+		if (otherObj == null)
+			return false;
+
+		if (!getClass().equals(otherObj.getClass()))
+		{
+			return false;
+		}
+
+		MessageRecipientEntity other = (MessageRecipientEntity) otherObj;
+		return this.messageRecipientId != null && this.messageRecipientId.equals(other.messageRecipientId);
+	}
 }

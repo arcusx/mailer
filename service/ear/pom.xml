@@ -5,13 +5,14 @@
     <artifactId>arcusx-mailer</artifactId>
     <groupId>com.arcusx.mailer</groupId>
     <version>1.0.7-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer-service-ear</artifactId>
   <version>1.0.7-SNAPSHOT</version>
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <packaging>ear</packaging>
-  <description>${artifactId}</description>
+  <description>${project.artifactId}</description>
 	<build>
 		<plugins>
 			<plugin>

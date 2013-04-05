@@ -2,7 +2,7 @@
  * 
  */
 
-package com.arcusx.mailer.batch;
+package com.arcusx.mailer.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,23 +18,17 @@ import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import org.junit.Test;
-import org.mockito.Mock;
 
 import com.arcusx.mailer.HtmlMessageBody;
 
 /**
  * @author chwa
- *
  */
 public class MimeMessageBuilderTest
 {
-	@Mock
-	Session session;
-
 	@Test
 	public void thatBuilderBuildsThrowsExceptionForEmptyBodies() throws Exception
 	{
@@ -43,7 +37,7 @@ public class MimeMessageBuilderTest
 		Set<String> recipients = new HashSet<String>(Arrays.asList("recipient1"));
 		String subject = "subject";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, null, null);
+		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, null, subject, null, null);
 
 		// when
 		try
@@ -67,8 +61,9 @@ public class MimeMessageBuilderTest
 		Set<String> recipients = new HashSet<String>(Arrays.asList("recipient1"));
 		String subject = "subject";
 		String plainTextBody = "plainTextBody";
+		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, plainTextBody);
+		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, null);
 
 		// when
 		MimeMessage message = builder.createMimeMessage();
@@ -82,6 +77,7 @@ public class MimeMessageBuilderTest
 		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
+		assertEquals(replyTo, message.getReplyTo()[0].toString());
 		final DataHandler dataHandler = message.getDataHandler();
 		assertEquals("text/plain; charset=UTF-8", dataHandler.getContentType());
 		Object content = dataHandler.getContent();
@@ -96,8 +92,9 @@ public class MimeMessageBuilderTest
 		Set<String> recipients = new HashSet<String>(Arrays.asList("recipient1"));
 		String subject = "subject";
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body>htmlText</body></html>");
+		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, htmlBody);
+		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, null, htmlBody);
 
 		// when
 		MimeMessage message = builder.createMimeMessage();
@@ -111,6 +108,7 @@ public class MimeMessageBuilderTest
 		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
+		assertEquals(replyTo, message.getReplyTo()[0].toString());
 		final DataHandler dataHandler = message.getDataHandler();
 		assertEquals("text/html; charset=UTF-8", dataHandler.getContentType());
 		Object content = dataHandler.getContent();
@@ -126,9 +124,9 @@ public class MimeMessageBuilderTest
 		String subject = "subject";
 		String plainTextBody = "plainTextBody with äöü";
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body>htmlText with äöü</body></html>");
+		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, plainTextBody,
-				htmlBody);
+		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
 
 		// when
 		MimeMessage message = builder.createMimeMessage();
@@ -147,6 +145,8 @@ public class MimeMessageBuilderTest
 		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
 		Multipart content = (Multipart) dataHandler.getContent();
 		assertNotNull(content);
+
+		assertEquals(replyTo, message.getReplyTo()[0].toString());
 	}
 
 	@Test
@@ -160,9 +160,9 @@ public class MimeMessageBuilderTest
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body><img src=\"/de/logo.png\"/>htmlText</body></html>");
 		final byte[] imageData = new byte[] { 12, 12, 12, 12, 12};
 		htmlBody.addInlineImage("/de/logo.png", "image/png", imageData);
+		String replyTo = null;
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, plainTextBody,
-				htmlBody);
+		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
 
 		// when
 		MimeMessage message = builder.createMimeMessage();
@@ -196,7 +196,6 @@ public class MimeMessageBuilderTest
 		assertEquals("text/plain; charset=UTF-8", dataHandler.getContentType());
 		assertEquals(plainTextBody, dataHandler.getContent());
 
-
 		final BodyPart htmlPart = alternativeMultipart.getBodyPart(1);
 		dataHandler = htmlPart.getDataHandler();
 		assertEquals("text/html; charset=UTF-8", dataHandler.getContentType());
@@ -210,5 +209,7 @@ public class MimeMessageBuilderTest
 		assertEquals("/de/logo.png", header[0]);
 		assertEquals("image/png", dataHandler.getContentType());
 		assertEquals(imageData, dataHandler.getContent());
+
+		assertEquals(sender, message.getReplyTo()[0].toString());
 	}
 }

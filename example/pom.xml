@@ -5,11 +5,12 @@
     <artifactId>arcusx-mailer</artifactId>
     <groupId>com.arcusx.mailer</groupId>
     <version>1.0.7-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
   <artifactId>arcusx-mailer-example</artifactId>
-  <name>${artifactId}</name>
-  <description>${artifactId}</description>
+  <name>${project.artifactId}</name>
+  <description>${project.artifactId}</description>
   <build />
   <dependencies>
     <dependency>

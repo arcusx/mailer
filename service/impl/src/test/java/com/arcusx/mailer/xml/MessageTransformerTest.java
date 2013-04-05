@@ -42,35 +42,6 @@ public class MessageTransformerTest
 	}
 
 	@Test
-	public void testTransformToXmlString() throws Exception
-	{
-		// given
-		Message message = new Message();
-		message.setBody("Test Plain Body");
-		final HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body><h1>Headline</h1> Test HTML Body</body></html>");
-		htmlBody.addInlineImage("/src/logo.png", "image/png", new byte[] { 10});
-		message.setHtmlBody(htmlBody);
-		Set<String> recipients = new HashSet<String>();
-		recipients.add("recipient@test.de");
-		message.setRecipients(recipients);
-		message.setSender("sender@test.de");
-		message.setSubject("Test Message");
-
-		MessageToXmlTransformer messageTransformer = new MessageToXmlTransformer();
-
-		// when
-		String transform = messageTransformer.transform(message);
-
-		Base64 base64 = new Base64();
-		final String encoded = base64.encodeAsString(new byte[] { 10});
-
-		// then
-		assertEquals(
-				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><Mail><Body><Plain><Text>Test Plain Body</Text></Plain><Html><Text>&lt;html&gt;&lt;body&gt;&lt;h1&gt;Headline&lt;/h1&gt; Test HTML Body&lt;/body&gt;&lt;/html&gt;</Text><Images><Image name=\"/src/logo.png\" type=\"image/png\">"
-						+ encoded + "</Image></Images></Html></Body></Mail>", transform);
-	}
-
-	@Test
 	public void testTransformToMessage() throws Exception
 	{
 		// given

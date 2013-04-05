@@ -19,30 +19,30 @@
 
 package com.arcusx.mailer.service;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.security.PermitAll;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.apache.log4j.Logger;
 import org.jboss.annotation.ejb.RemoteBinding;
 
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.MessageManager;
 import com.arcusx.mailer.MessageManagerException;
+import com.arcusx.mailer.MimeMessageData;
 import com.arcusx.mailer.service.persistence.MessageEntity;
-import com.arcusx.mailer.service.persistence.MessageEntityBean;
-import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
 import com.arcusx.mailer.xml.XmlToMessageTransformer;
 
 /**
@@ -58,6 +58,8 @@ public class MessageManagerSLSessionBean implements MessageManager
 {
 	private static final int MAX_FAILURE_COUNT = 10;
 
+	private static Logger logger = Logger.getLogger(MessageManagerSLSessionBean.class);
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -70,8 +72,7 @@ public class MessageManagerSLSessionBean implements MessageManager
 	public List<Long> fetchUndeliveredMessageIds() throws MessageManagerException
 	{
 		// hibernate sucks ass
-		Query query = this.entityManager
-				.createNativeQuery("select m.message_id from mailer.message m where sent_date is null and failure_count < ?");
+		Query query = this.entityManager.createNativeQuery("select m.message_id from mailer.message m where sent_date is null and failure_count < ?");
 		query.setParameter(1, Integer.valueOf(MAX_FAILURE_COUNT));
 		List<BigInteger> messageIds = query.getResultList();
 		List<Long> result = new ArrayList<Long>(messageIds.size());
@@ -85,46 +86,58 @@ public class MessageManagerSLSessionBean implements MessageManager
 
 	@PermitAll
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Message fetchMessage(Long messageId) throws MessageManagerException
+	public MimeMessageData fetchMessage(Long messageId) throws MessageManagerException
 	{
-		Query query = this.entityManager.createNativeQuery("select m.* from mailer.message m where m.message_id = ?",
-				MessageEntityBean.class);
+		Query query = this.entityManager.createNativeQuery("select m.* from mailer.message m where m.message_id = ?", MessageEntity.class);
 		query.setParameter(1, messageId);
 		List<MessageEntity> messages = query.getResultList();
 		if (messages == null || messages.isEmpty())
 			throw new MessageManagerException("Message " + messageId + " not found.");
 
-		MessageEntity messageEntity = (MessageEntity) messages.get(0);
-
-		Message messageData = new Message(messageEntity.getMessageId());
-
-		String bodyType = messageEntity.getBodyType();
-		if (MessageEntity.BodyType.XML.name().equals(bodyType))
+		try
 		{
-			XmlToMessageTransformer messageTransformer = new XmlToMessageTransformer();
-			try
+			MessageEntity messageEntity = (MessageEntity) messages.get(0);
+			switch (messageEntity.getBodyType())
 			{
-				messageTransformer.transform(messageEntity.getBody(), messageData);
-			}
-			catch (Exception e)
-			{
-				String msg = "Message body could not be transformed.";
-				throw new MessageManagerException(msg);
+				case MIME:
+					return mimeMessageForMime(messageEntity);
+				case PLAIN:
+					return mimeMessageForPlain(messageEntity);
+				case XML:
+					return mimeMessageForXml(messageEntity);
+				default:
+					throw new IllegalArgumentException("Unknown body type " + messageEntity.getBodyType() + ".");
 			}
 		}
-		else
+		catch (Exception ex)
 		{
-			messageData.setBody(messageEntity.getBody());
+			logger.warn("Fetching message failed.", ex);
+
+			throw new MessageManagerException(ex.getMessage());
 		}
-		Set<String> recipients = new HashSet<String>();
-		for (MessageRecipientEntity recipientEntity : messageEntity.getRecipients())
-		{
-			recipients.add(recipientEntity.getEmailAddress());
-		}
-		messageData.setRecipients(recipients);
-		messageData.setSender(messageEntity.getSender());
-		messageData.setSubject(messageEntity.getSubject());
-		return messageData;
+	}
+
+	private MimeMessageData mimeMessageForMime(MessageEntity messageEntity) throws IOException
+	{
+		byte[] mimeMessageBytes = messageEntity.getBody().getBytes("ASCII");
+		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
+	}
+
+	private MimeMessageData mimeMessageForPlain(MessageEntity messageEntity) throws IOException, MessagingException
+	{
+		byte[] mimeMessageBytes = new MimeMessageBuilder(messageEntity.getSender(), messageEntity.getRecipientsAsStrings(), null, messageEntity.getSubject(),
+				messageEntity.getBody(), null).createMimeMessageAsBytes();
+		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
+	}
+
+	private MimeMessageData mimeMessageForXml(MessageEntity messageEntity) throws Exception
+	{
+		Message message = new Message(messageEntity.getMessageId());
+		new XmlToMessageTransformer().transform(messageEntity.getBody(), message);
+
+		byte[] mimeMessageBytes = new MimeMessageBuilder(messageEntity.getSender(), messageEntity.getRecipientsAsStrings(), null, messageEntity.getSubject(),
+				message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
+		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
 	}
 
 	@PermitAll
@@ -134,7 +147,7 @@ public class MessageManagerSLSessionBean implements MessageManager
 		if (messageId == null)
 			throw new IllegalArgumentException("Message id may not be null.");
 
-		MessageEntity n = this.entityManager.find(MessageEntityBean.class, messageId);
+		MessageEntity n = this.entityManager.find(MessageEntity.class, messageId);
 		if (n.getSentDate() != null)
 			return; // no problem, already sent
 		else
@@ -148,7 +161,7 @@ public class MessageManagerSLSessionBean implements MessageManager
 		if (messageId == null)
 			throw new IllegalArgumentException("Message id may not be null.");
 
-		MessageEntity n = this.entityManager.find(MessageEntityBean.class, messageId);
+		MessageEntity n = this.entityManager.find(MessageEntity.class, messageId);
 		if (n.getSentDate() != null)
 			return; // no problem, already sent
 		else

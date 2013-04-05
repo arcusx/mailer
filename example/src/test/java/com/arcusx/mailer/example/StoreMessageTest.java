@@ -26,9 +26,8 @@ public class StoreMessageTest
 		message.setSubject("test" + new Date());
 		message.setBody("test");
 		message.setSender("test@localhost");
-		message.setRecipients(new HashSet<String>(Arrays.asList(new String[] {
-				"recipient1@localhost",
-				"recipient2@localhost"})));
+		message.setRecipients(new HashSet<String>(Arrays.asList(new String[] { "c.buschka@arcusx.com", "conni@arcusx.lan"})));
+		message.setReplyTo("c.buschka@gmx.de");
 
 		mailerService.storeMessage(message);
 	}

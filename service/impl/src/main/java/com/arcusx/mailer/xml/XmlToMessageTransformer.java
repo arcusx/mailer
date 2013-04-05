@@ -42,7 +42,9 @@ import com.arcusx.mailer.Message;
  * Created on Aug 21, 2012.
  * 
  * @author sven
+ * @deprecated
  */
+@Deprecated
 public class XmlToMessageTransformer
 {
 	private final PlainParsing plainState = new PlainParsing();

@@ -19,7 +19,7 @@
 
 package com.arcusx.mailer.batch;
 
-import java.util.Set;
+import java.io.ByteArrayInputStream;
 
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
@@ -35,10 +35,9 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.log4j.Logger;
 
-import com.arcusx.mailer.HtmlMessageBody;
-import com.arcusx.mailer.Message;
 import com.arcusx.mailer.MessageManager;
 import com.arcusx.mailer.MessageManagerException;
+import com.arcusx.mailer.MimeMessageData;
 
 /**
  *
@@ -70,8 +69,8 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	{
 		try
 		{
-			Message n = this.messageManager.fetchMessage(messageId);
-			boolean sent = trySendMessage(n);
+			MimeMessageData mimeMessage = this.messageManager.fetchMessage(messageId);
+			boolean sent = trySendMessage(mimeMessage);
 			if (sent)
 				this.messageManager.markMessageSent(messageId);
 			else
@@ -94,26 +93,18 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	 * @throws MessageManagerException
 	 * @throws Exception
 	 */
-	private boolean trySendMessage(Message n) throws MessageManagerException, Exception
+	private boolean trySendMessage(MimeMessageData mimeMessageData) throws MessageManagerException, Exception
 	{
 		try
 		{
-			final String sender = n.getSender();
-			final Set<String> recipients = n.getRecipients();
-			final String subject = n.getSubject();
-			final String plainTextBody = n.getBody();
-			final HtmlMessageBody htmlBody = n.getHtmlBody();
-
-			MimeMessageBuilder builder = new MimeMessageBuilder(session, sender, recipients, subject, plainTextBody,
-					htmlBody);;
-			MimeMessage message = builder.createMimeMessage();
+			MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(mimeMessageData.getData()));
 
 			Transport.send(message);
 			return true;
 		}
 		catch (Exception ex)
 		{
-			logger.warn("Creating/Sending message " + n.getMessageId() + " failed.", ex);
+			logger.warn("Creating/Sending message " + mimeMessageData.getMessageId() + " failed.", ex);
 			return false;
 		}
 	}

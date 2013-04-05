@@ -1,0 +1,1 @@
+alter table mailer.message add constraint ck_mailer_message_body_type check ( body_type in ( 'MIME', 'PLAIN', 'XML' ) );

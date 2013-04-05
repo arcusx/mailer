@@ -29,7 +29,7 @@ import java.util.Set;
  * @author conni
  * @version $Id$
  */
-public final class Message implements Serializable
+public class Message implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,6 +45,8 @@ public final class Message implements Serializable
 
 	private HtmlMessageBody htmlBody;
 
+	private String replyTo;
+
 	public Message()
 	{
 	}
@@ -57,6 +59,16 @@ public final class Message implements Serializable
 	public Long getMessageId()
 	{
 		return this.messageId;
+	}
+
+	public void setReplyTo(String replyTo)
+	{
+		this.replyTo = replyTo;
+	}
+
+	public String getReplyTo()
+	{
+		return replyTo;
 	}
 
 	public String getSender()

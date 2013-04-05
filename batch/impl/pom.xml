@@ -5,13 +5,14 @@
 		<artifactId>arcusx-mailer</artifactId>
 		<groupId>com.arcusx.mailer</groupId>
 		<version>1.0.7-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>com.arcusx.mailer</groupId>
 	<artifactId>arcusx-mailer-batch-impl</artifactId>
 	<version>1.0.7-SNAPSHOT</version>
-	<name>${artifactId}</name>
+	<name>${project.artifactId}</name>
 	<packaging>ejb</packaging>
-	<description>${artifactId}</description>
+	<description>${project.artifactId}</description>
 	<build>
 		<plugins>
 			<plugin>
@@ -60,7 +61,7 @@
 		<dependency>
 			<groupId>com.arcusx.3rdparty.org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-                        <scope>test</scope>
+            <scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

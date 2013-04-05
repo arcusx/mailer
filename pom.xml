@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>arcusx-parent</artifactId>
 		<groupId>com.arcusx.parent</groupId>
-		<version>1.0.23</version>
+		<version>1.0.25</version>
 	</parent>
 	<groupId>com.arcusx.mailer</groupId>
 	<artifactId>arcusx-mailer</artifactId>
@@ -26,22 +26,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<dependencies>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<useReleaseProfile>true</useReleaseProfile>
-				</configuration>
-				<dependencies>
-				</dependencies>
-			</plugin>
-		</plugins>
 	</build>
 	<modules>
 		<module>service/api</module>
