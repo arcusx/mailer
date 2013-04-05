@@ -4,7 +4,7 @@
   <parent>
     <artifactId>arcusx-mailer</artifactId>
     <groupId>com.arcusx.mailer</groupId>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>com.arcusx.mailer</groupId>
