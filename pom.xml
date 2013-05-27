@@ -12,8 +12,8 @@
 	<name>arcusx-mailer</name>
 	<description>arcusx-mailer</description>
 	<scm>
-		<connection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</connection>
-		<developerConnection>scm:git:ssh://scm.arcusx.lan/srv/git/arcusx/mailer.git</developerConnection>
+		<connection>scm:git:ssh://scm.arcusx.lan/arcusx/mailer.git</connection>
+		<developerConnection>scm:git:ssh://scm.arcusx.lan/arcusx/mailer.git</developerConnection>
 	  <tag>HEAD</tag>
   </scm>
 	<build>
