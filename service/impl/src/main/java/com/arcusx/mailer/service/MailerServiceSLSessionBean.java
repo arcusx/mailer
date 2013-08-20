@@ -34,7 +34,6 @@ import com.arcusx.mailer.MailerException;
 import com.arcusx.mailer.MailerService;
 import com.arcusx.mailer.Message;
 import com.arcusx.mailer.service.persistence.MessageEntity;
-import com.arcusx.mailer.service.persistence.MessageRecipientEntity;
 
 /**
  *
@@ -60,8 +59,8 @@ public class MailerServiceSLSessionBean implements MailerService
 	{
 		try
 		{
-			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(), message.getReplyTo(), message.getSubject(),
-					message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
+			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(), message.getCcRecipients(), message.getReplyTo(),
+					message.getSubject(), message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
 			String mimeMessageText = new String(mimeMessageBytes, "ASCII");
 
 			MessageEntity messageEntity = new MessageEntity();

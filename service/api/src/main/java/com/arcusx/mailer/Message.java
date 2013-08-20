@@ -39,6 +39,8 @@ public class Message implements Serializable
 
 	private Set<String> recipients = new HashSet<String>();
 
+	private Set<String> ccRecipients = new HashSet<String>();
+
 	private String subject;
 
 	private String body;
@@ -68,7 +70,7 @@ public class Message implements Serializable
 
 	public String getReplyTo()
 	{
-		return replyTo;
+		return this.replyTo;
 	}
 
 	public String getSender()
@@ -123,12 +125,22 @@ public class Message implements Serializable
 
 	public HtmlMessageBody getHtmlBody()
 	{
-		return htmlBody;
+		return this.htmlBody;
 	}
 
 	public void setHtmlBody(HtmlMessageBody htmlBody)
 	{
 		this.htmlBody = htmlBody;
+	}
+
+	public Set<String> getCcRecipients()
+	{
+		return this.ccRecipients;
+	}
+
+	public void setCcRecipients(Set<String> ccRecipients)
+	{
+		this.ccRecipients = ccRecipients;
 	}
 
 }

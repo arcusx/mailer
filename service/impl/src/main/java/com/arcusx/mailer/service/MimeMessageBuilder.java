@@ -7,6 +7,7 @@ package com.arcusx.mailer.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -24,10 +25,6 @@ import javax.mail.internet.MimeMultipart;
 import com.arcusx.mailer.HtmlMessageBody;
 import com.arcusx.mailer.MessageImage;
 
-/**
- * @author chwa
- *
- */
 public class MimeMessageBuilder
 {
 	private final String sender;
@@ -36,11 +33,19 @@ public class MimeMessageBuilder
 	private final String subject;
 	private final String plainTextBody;
 	private final HtmlMessageBody htmlBody;
+	private final Set<String> ccRecipients;
 
 	public MimeMessageBuilder(String sender, Set<String> recipients, String replyTo, String subject, String plainTextBody, HtmlMessageBody htmlBody)
 	{
+		this(sender, recipients, Collections.<String> emptySet(), replyTo, subject, plainTextBody, htmlBody);
+	}
+
+	public MimeMessageBuilder(String sender, Set<String> recipients, Set<String> ccRecipients, String replyTo, String subject, String plainTextBody,
+			HtmlMessageBody htmlBody)
+	{
 		this.sender = sender;
 		this.recipients = recipients;
+		this.ccRecipients = ccRecipients;
 		this.replyTo = replyTo;
 		this.subject = subject;
 		this.plainTextBody = plainTextBody;
@@ -62,13 +67,11 @@ public class MimeMessageBuilder
 			throw new IllegalArgumentException("Sender is null.");
 		if (this.subject == null)
 			throw new IllegalArgumentException("Subject is null.");
-		if (this.plainTextBody == null && this.htmlBody == null)
-			throw new IllegalArgumentException("Neither plain nor html body is set.");
 
 		MimeMessage message = null;
 
-		boolean hasPlainTextBody = plainTextBody != null && plainTextBody.trim().length() > 0;
-		boolean hasHtmlBody = htmlBody != null;
+		boolean hasPlainTextBody = notNullAndNotEmpty(this.plainTextBody);
+		boolean hasHtmlBody = this.htmlBody != null;
 		if (hasPlainTextBody && !hasHtmlBody)
 		{
 			message = createPlainTextEmail();
@@ -88,11 +91,16 @@ public class MimeMessageBuilder
 		return message;
 	}
 
+	public boolean notNullAndNotEmpty(final String text)
+	{
+		return text != null && !text.trim().isEmpty();
+	}
+
 	private MimeMessage createPlainTextEmail() throws MessagingException
 	{
 		MimeMessage message = new MimeMessage((Session) null);
 		fillAddressesAndSubject(message);
-		message.setText(plainTextBody, "UTF-8");
+		message.setText(this.plainTextBody, "UTF-8");
 
 		return message;
 	}
@@ -102,7 +110,7 @@ public class MimeMessageBuilder
 		MimeMessage message = new MimeMessage((Session) null);
 		fillAddressesAndSubject(message);
 		message.addHeader("Content-Type", "text/html; charset=UTF-8");
-		message.setText(htmlBody.getHtml(), "UTF-8", "html");
+		message.setText(this.htmlBody.getHtml(), "UTF-8", "html");
 
 		return message;
 	}
@@ -143,8 +151,8 @@ public class MimeMessageBuilder
 	{
 		MimeBodyPart htmlBodyPart = new MimeBodyPart();
 		htmlBodyPart.addHeader("Content-Type", "text/html; charset=UTF-8");
-		String html = htmlBody.getHtml();
-		final List<MessageImage> images = htmlBody.getImages();
+		String html = this.htmlBody.getHtml();
+		final List<MessageImage> images = this.htmlBody.getImages();
 		for (MessageImage image : images)
 		{
 			html = html.replace(image.identifier, "cid:" + image.identifier);
@@ -156,7 +164,7 @@ public class MimeMessageBuilder
 	private List<MimeBodyPart> createImageBodyParts() throws MessagingException
 	{
 		List<MimeBodyPart> imageBodyParts = new ArrayList<MimeBodyPart>();
-		final List<MessageImage> images = htmlBody.getImages();
+		final List<MessageImage> images = this.htmlBody.getImages();
 		for (MessageImage image : images)
 		{
 			MimeBodyPart imageBodyPart = new MimeBodyPart();
@@ -172,20 +180,25 @@ public class MimeMessageBuilder
 	{
 		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
 		plainTextBodyPart.addHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
-		plainTextBodyPart.setText(plainTextBody, "UTF-8");
+		plainTextBodyPart.setText(this.plainTextBody, "UTF-8");
 		return plainTextBodyPart;
 	}
 
 	private void fillAddressesAndSubject(MimeMessage message) throws MessagingException, AddressException
 	{
-		message.setFrom(new InternetAddress(sender));
+		message.setFrom(new InternetAddress(this.sender));
 
-		for (Iterator<String> iter = recipients.iterator(); iter.hasNext();)
+		for (Iterator<String> iter = this.recipients.iterator(); iter.hasNext();)
 		{
 			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
 		}
 
-		message.setSubject(subject);
+		for (Iterator<String> iter = this.ccRecipients.iterator(); iter.hasNext();)
+		{
+			message.addRecipient(javax.mail.Message.RecipientType.CC, new InternetAddress(iter.next()));
+		}
+
+		message.setSubject(this.subject);
 
 		if (this.replyTo != null)
 		{
