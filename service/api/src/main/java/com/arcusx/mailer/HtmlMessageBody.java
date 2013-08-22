@@ -31,17 +31,22 @@ public class HtmlMessageBody implements Serializable
 
 	public String getHtml()
 	{
-		return html;
+		return this.html;
 	}
 
 	public void addInlineImage(String identifier, String type, byte[] imageData)
 	{
-		final MessageImage image = new MessageImage(identifier, type, imageData);
+		addInlineImage(identifier, identifier, type, imageData);
+	}
+
+	public void addInlineImage(String filename, String identifier, String type, byte[] imageData)
+	{
+		final MessageImage image = new MessageImage(filename, identifier, type, imageData);
 		this.inlineImages.add(image);
 	}
 
 	public List<MessageImage> getImages()
 	{
-		return Collections.unmodifiableList(inlineImages);
+		return Collections.unmodifiableList(this.inlineImages);
 	}
 }

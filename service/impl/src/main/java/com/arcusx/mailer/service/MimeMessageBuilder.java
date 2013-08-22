@@ -169,8 +169,9 @@ public class MimeMessageBuilder
 		{
 			MimeBodyPart imageBodyPart = new MimeBodyPart();
 			imageBodyPart.setDataHandler(new DataHandler(image.data, image.type));
-			imageBodyPart.setHeader("Content-ID", image.identifier);
+			imageBodyPart.setContentID(image.identifier);
 			imageBodyPart.setDisposition(Part.INLINE);
+			imageBodyPart.setFileName(image.name);
 			imageBodyParts.add(imageBodyPart);
 		}
 		return imageBodyParts;
