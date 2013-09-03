@@ -88,11 +88,6 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 		}
 	}
 
-	/**
-	 * @param messageId
-	 * @throws MessageManagerException
-	 * @throws Exception
-	 */
 	private boolean trySendMessage(MimeMessageData mimeMessageData) throws MessageManagerException, Exception
 	{
 		try
