@@ -19,22 +19,15 @@
 
 package com.arcusx.mailer.service.persistence;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -51,8 +44,10 @@ public class MessageEntity
 	public static enum BodyType
 	{
 		@Deprecated
-		PLAIN, @Deprecated
-		XML, MIME;
+		PLAIN, //
+		@Deprecated
+		XML, //
+		MIME;
 	}
 
 	@Id
@@ -66,10 +61,6 @@ public class MessageEntity
 	@Deprecated
 	@Column(name = "sender", nullable = false)
 	private String sender;
-
-	@OneToMany(fetch = FetchType.EAGER, targetEntity = MessageRecipientEntity.class, cascade = CascadeType.ALL)
-	@JoinColumn(name = "message_id", nullable = false, unique = false)
-	private Set<MessageRecipientEntity> recipients = new HashSet<MessageRecipientEntity>();
 
 	/**
 	 * @deprecated Stored in MIME body.
@@ -114,60 +105,9 @@ public class MessageEntity
 		return this.sender;
 	}
 
-	/**
-	 * @deprecated Stored in MIME body.
-	 */
-	@Deprecated
-	public void setSender(String sender)
-	{
-		this.sender = sender;
-	}
-
 	public Long getMessageId()
 	{
 		return this.messageId;
-	}
-
-	/**
-	 * @deprecated Stored in MIME body.
-	 */
-	@Deprecated
-	public Set<String> getRecipientsAsStrings()
-	{
-		Set<String> recipients = new HashSet<String>();
-		for (MessageRecipientEntity recipientEntity : this.recipients)
-		{
-			recipients.add(recipientEntity.getEmailAddress());
-		}
-
-		return recipients;
-	}
-
-	/**
-	 * @deprecated Stored in MIME body.
-	 */
-	@Deprecated
-	public void addRecipient(MessageRecipientEntity recipient)
-	{
-		this.recipients.add(recipient);
-	}
-
-	/**
-	 * @deprecated Stored in MIME body.
-	 */
-	@Deprecated
-	public String getSubject()
-	{
-		return this.subject;
-	}
-
-	/**
-	 * @deprecated Stored in MIME body.
-	 */
-	@Deprecated
-	public void setSubject(String subject)
-	{
-		this.subject = subject;
 	}
 
 	public String getBody()

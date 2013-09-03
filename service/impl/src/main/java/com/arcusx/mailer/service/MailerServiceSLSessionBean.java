@@ -64,8 +64,6 @@ public class MailerServiceSLSessionBean implements MailerService
 			String mimeMessageText = new String(mimeMessageBytes, "ASCII");
 
 			MessageEntity messageEntity = new MessageEntity();
-			messageEntity.setSender("*sender in body*"); // for compatibility
-			messageEntity.setSubject("*subject in body*"); // for compatibility
 			messageEntity.setBody(mimeMessageText);
 			messageEntity.setBodyType(MessageEntity.BodyType.MIME);
 			messageEntity.setFailureCount(0);

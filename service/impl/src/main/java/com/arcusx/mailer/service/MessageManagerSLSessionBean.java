@@ -30,7 +30,6 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.mail.MessagingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -38,12 +37,10 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 import org.jboss.annotation.ejb.RemoteBinding;
 
-import com.arcusx.mailer.Message;
 import com.arcusx.mailer.MessageManager;
 import com.arcusx.mailer.MessageManagerException;
 import com.arcusx.mailer.MimeMessageData;
 import com.arcusx.mailer.service.persistence.MessageEntity;
-import com.arcusx.mailer.xml.XmlToMessageTransformer;
 
 /**
  *
@@ -102,9 +99,8 @@ public class MessageManagerSLSessionBean implements MessageManager
 				case MIME:
 					return mimeMessageForMime(messageEntity);
 				case PLAIN:
-					return mimeMessageForPlain(messageEntity);
 				case XML:
-					return mimeMessageForXml(messageEntity);
+					throw new IllegalArgumentException("Body type " + messageEntity.getBodyType() + " is not supported anymore.");
 				default:
 					throw new IllegalArgumentException("Unknown body type " + messageEntity.getBodyType() + ".");
 			}
@@ -120,23 +116,6 @@ public class MessageManagerSLSessionBean implements MessageManager
 	private MimeMessageData mimeMessageForMime(MessageEntity messageEntity) throws IOException
 	{
 		byte[] mimeMessageBytes = messageEntity.getBody().getBytes("ASCII");
-		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
-	}
-
-	private MimeMessageData mimeMessageForPlain(MessageEntity messageEntity) throws IOException, MessagingException
-	{
-		byte[] mimeMessageBytes = new MimeMessageBuilder(messageEntity.getSender(), messageEntity.getRecipientsAsStrings(), null, messageEntity.getSubject(),
-				messageEntity.getBody(), null).createMimeMessageAsBytes();
-		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
-	}
-
-	private MimeMessageData mimeMessageForXml(MessageEntity messageEntity) throws Exception
-	{
-		Message message = new Message(messageEntity.getMessageId());
-		new XmlToMessageTransformer().transform(messageEntity.getBody(), message);
-
-		byte[] mimeMessageBytes = new MimeMessageBuilder(messageEntity.getSender(), messageEntity.getRecipientsAsStrings(), null, messageEntity.getSubject(),
-				message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
 		return new MimeMessageData(messageEntity.getMessageId(), mimeMessageBytes);
 	}
 

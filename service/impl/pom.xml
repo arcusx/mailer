@@ -29,7 +29,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencyManagement />
 	<dependencies>
 		<dependency>
 			<groupId>com.arcusx.mailer</groupId>
@@ -46,10 +45,6 @@
 			<artifactId>jboss-ejb-libs</artifactId>
 			<type>pom</type>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.arcusx.commons</groupId>
-			<artifactId>arcusx-commons-xml</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
