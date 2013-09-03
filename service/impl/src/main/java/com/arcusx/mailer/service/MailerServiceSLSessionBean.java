@@ -19,21 +19,21 @@
 
 package com.arcusx.mailer.service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJBException;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.sql.DataSource;
 
 import org.jboss.annotation.ejb.RemoteBinding;
 
 import com.arcusx.mailer.MailerException;
 import com.arcusx.mailer.MailerService;
 import com.arcusx.mailer.Message;
-import com.arcusx.mailer.service.persistence.MessageEntity;
 
 /**
  *
@@ -46,11 +46,19 @@ import com.arcusx.mailer.service.persistence.MessageEntity;
 // @SecurityDomain
 public class MailerServiceSLSessionBean implements MailerService
 {
-	@PersistenceContext
-	private EntityManager entityManager;
+	@Resource(mappedName = "java:/DefaultDS")
+	private DataSource dataSource;
+
+	private MessageStore messageStore;
 
 	public MailerServiceSLSessionBean()
 	{
+	}
+
+	@PostConstruct
+	private void init()
+	{
+		this.messageStore = new MessageStore(this.dataSource);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -59,15 +67,10 @@ public class MailerServiceSLSessionBean implements MailerService
 	{
 		try
 		{
-			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(), message.getCcRecipients(), message.getReplyTo(),
-					message.getSubject(), message.getBody(), message.getHtmlBody()).createMimeMessageAsBytes();
-			String mimeMessageText = new String(mimeMessageBytes, "ASCII");
-
-			MessageEntity messageEntity = new MessageEntity();
-			messageEntity.setBody(mimeMessageText);
-			messageEntity.setBodyType(MessageEntity.BodyType.MIME);
-			messageEntity.setFailureCount(0);
-			this.entityManager.persist(messageEntity);
+			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(),
+					message.getCcRecipients(), message.getReplyTo(), message.getSubject(), message.getBody(),
+					message.getHtmlBody()).createMimeMessageAsBytes();
+			this.messageStore.storeMessage(mimeMessageBytes);
 		}
 		catch (Exception ex)
 		{

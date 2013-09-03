@@ -21,11 +21,14 @@ package com.arcusx.mailer;
 
 import java.io.Serializable;
 
+import javax.ejb.ApplicationException;
+
 /**
  *
  * @author conni
  * @version $Id$
  */
+@ApplicationException(rollback = true)
 public class MessageManagerException extends Exception implements Serializable
 {
 	private static final long serialVersionUID = 1L;

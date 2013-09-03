@@ -59,9 +59,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.arcusx.3rdparty.org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-            <scope>test</scope>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

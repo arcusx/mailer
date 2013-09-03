@@ -19,8 +19,6 @@
 
 package com.arcusx.mailer.batch;
 
-import java.io.ByteArrayInputStream;
-
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
 import javax.ejb.EJB;
@@ -30,14 +28,10 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
 
 import org.apache.log4j.Logger;
 
 import com.arcusx.mailer.MessageManager;
-import com.arcusx.mailer.MessageManagerException;
-import com.arcusx.mailer.MimeMessageData;
 
 /**
  *
@@ -69,13 +63,7 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 	{
 		try
 		{
-			MimeMessageData mimeMessage = this.messageManager.fetchMessage(messageId);
-			boolean sent = trySendMessage(mimeMessage);
-			if (sent)
-				this.messageManager.markMessageSent(messageId);
-			else
-				this.messageManager.countMessageSendFailure(messageId);
-			return sent;
+			return new MessageDeliverySession(session, messageManager).sendMessage(messageId);
 		}
 		catch (Exception ex)
 		{
@@ -87,21 +75,4 @@ public class MessageDeliveryServiceSLSessionBean implements MessageDeliveryServi
 			throw new EJBException(msg);
 		}
 	}
-
-	private boolean trySendMessage(MimeMessageData mimeMessageData) throws MessageManagerException, Exception
-	{
-		try
-		{
-			MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(mimeMessageData.getData()));
-
-			Transport.send(message);
-			return true;
-		}
-		catch (Exception ex)
-		{
-			logger.warn("Creating/Sending message " + mimeMessageData.getMessageId() + " failed.", ex);
-			return false;
-		}
-	}
-
 }
