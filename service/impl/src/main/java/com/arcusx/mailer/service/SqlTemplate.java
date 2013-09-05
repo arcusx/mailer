@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.sql.DataSource;
 
@@ -21,12 +22,20 @@ public class SqlTemplate
 		this.dataSource = dataSource;
 	}
 
-	public void update(String sql, Object[] args) throws SQLException
+	public int update(String sql, Object[] args) throws SQLException
 	{
-		select(sql, args, null);
+		return execute(sql, args, null);
 	}
 
 	public <T> T select(String sql, Object[] args, ResultSetExtractor<T> extractor) throws SQLException
+	{
+		if (extractor == null)
+			throw new IllegalArgumentException("No result set extractor.");
+
+		return execute(sql, args, extractor);
+	}
+
+	private <T> T execute(String sql, Object[] args, ResultSetExtractor<T> extractor) throws SQLException
 	{
 		Connection conn = null;
 		PreparedStatement pStmt = null;
@@ -41,13 +50,21 @@ public class SqlTemplate
 					pStmt.setString(i + 1, (String) args[i]);
 				else if (args[i] instanceof Long)
 					pStmt.setLong(i + 1, (Long) args[i]);
+				else if (args[i] instanceof Date)
+					pStmt.setDate(i + 1, new java.sql.Date(((Date) args[i]).getTime()));
 				else
 					throw new IllegalArgumentException("Unhandled arg " + args[i] + ".");
 			}
 			T result = null;
-			rSet = pStmt.executeQuery();
 			if (extractor != null)
+			{
+				rSet = pStmt.executeQuery();
 				result = extractor.extract(rSet);
+			}
+			else
+			{
+				result = (T) Integer.valueOf(pStmt.executeUpdate());
+			}
 			return result;
 		}
 		finally
