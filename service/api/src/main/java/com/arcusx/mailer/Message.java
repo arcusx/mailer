@@ -149,7 +149,7 @@ public class Message implements Serializable
 
 	public boolean hasAttachments()
 	{
-		return !this.messageAttachments.isEmpty();
+		return this.messageAttachments != null && !this.messageAttachments.isEmpty();
 	}
 
 	public void addMessageAttachment(String name, String contentType, byte[] data)
@@ -159,6 +159,9 @@ public class Message implements Serializable
 
 	public Iterable<MessageAttachment> getMessageAttachments()
 	{
+		if (this.messageAttachments == null)
+			return Collections.emptyList();
+
 		return Collections.unmodifiableList(this.messageAttachments);
 	}
 }
