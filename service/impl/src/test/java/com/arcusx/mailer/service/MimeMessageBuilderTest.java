@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,20 +30,18 @@ import com.arcusx.mailer.HtmlMessageBody;
  */
 public class MimeMessageBuilderTest
 {
+	MimeMessageBuilder builder = new MimeMessageBuilder();
+
 	@Test
 	public void thatBuilderBuildsThrowsExceptionForEmptyBodies() throws Exception
 	{
 		// given
-		String sender = "sender";
-		Set<String> recipients = new HashSet<String>(Arrays.asList("recipient1"));
-		String subject = "subject";
-
-		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, null, subject, null, null);
+		com.arcusx.mailer.Message message = createMessage("sender", Arrays.asList("recipient1"), null, "subject", null, null);
 
 		// when
 		try
 		{
-			MimeMessage message = builder.createMimeMessage();
+			this.builder.createMimeMessage(message);
 			// then
 			fail("No IllegalArgumentException caught, allthough expected.");
 		}
@@ -63,23 +62,23 @@ public class MimeMessageBuilderTest
 		String plainTextBody = "plainTextBody";
 		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, null);
+		com.arcusx.mailer.Message message = createMessage(sender, recipients, replyTo, subject, plainTextBody, null);
 
 		// when
-		MimeMessage message = builder.createMimeMessage();
+		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
 
 		// then
-		final Address[] fromAddresses = message.getFrom();
+		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
 		assertEquals(sender, fromAddresses[0].toString());
-		assertEquals(subject, message.getSubject());
-		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
+		assertEquals(subject, mimeMessage.getSubject());
+		final Address[] recipientAddresses = mimeMessage.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
-		assertEquals(replyTo, message.getReplyTo()[0].toString());
-		final DataHandler dataHandler = message.getDataHandler();
-		assertEquals("text/plain; charset=UTF-8", dataHandler.getContentType());
+		assertEquals(replyTo, mimeMessage.getReplyTo()[0].toString());
+		final DataHandler dataHandler = mimeMessage.getDataHandler();
+		assertEquals("text/plain; charset=UTF-8; format=flowed", dataHandler.getContentType());
 		Object content = dataHandler.getContent();
 		assertEquals(plainTextBody, content);
 	}
@@ -94,29 +93,30 @@ public class MimeMessageBuilderTest
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body>htmlText</body></html>");
 		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, null, htmlBody);
+		com.arcusx.mailer.Message message = createMessage(sender, recipients, replyTo, subject, null, htmlBody);
 
 		// when
-		MimeMessage message = builder.createMimeMessage();
+		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
 
 		// then
-		final Address[] fromAddresses = message.getFrom();
+		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
 		assertEquals(sender, fromAddresses[0].toString());
-		assertEquals(subject, message.getSubject());
-		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
+		assertEquals(subject, mimeMessage.getSubject());
+		final Address[] recipientAddresses = mimeMessage.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
-		assertEquals(replyTo, message.getReplyTo()[0].toString());
-		final DataHandler dataHandler = message.getDataHandler();
-		assertEquals("text/html; charset=UTF-8", dataHandler.getContentType());
+		assertEquals(replyTo, mimeMessage.getReplyTo()[0].toString());
+		final DataHandler dataHandler = mimeMessage.getDataHandler();
+		assertEquals("text/html; charset=UTF-8; format=flowed", dataHandler.getContentType());
 		Object content = dataHandler.getContent();
 		assertEquals(htmlBody.getHtml(), content);
+
 	}
 
 	@Test
-	public void thatBuilderBuildsMultipartMails() throws Exception
+	public void thatBuilderBuildsMultipartAlternativeMailsForHtmlAndPlainText() throws Exception
 	{
 		// given
 		String sender = "sender";
@@ -126,27 +126,70 @@ public class MimeMessageBuilderTest
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body>htmlText with äöü</body></html>");
 		String replyTo = "replyTo";
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
+		com.arcusx.mailer.Message message = createMessage(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
 
 		// when
-		MimeMessage message = builder.createMimeMessage();
+		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
 
 		// then
-		final Address[] fromAddresses = message.getFrom();
+		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
 		assertEquals(sender, fromAddresses[0].toString());
-		assertEquals(subject, message.getSubject());
-		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
+		assertEquals(subject, mimeMessage.getSubject());
+		final Address[] recipientAddresses = mimeMessage.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
 
-		final DataHandler dataHandler = message.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
-		Multipart content = (Multipart) dataHandler.getContent();
+		String expectedContentType = "multipart/alternative";
+		String actualContentType = mimeMessage.getDataHandler().getContentType();
+		assertContentTypeStartsWith(expectedContentType, actualContentType);
+		Multipart content = (Multipart) mimeMessage.getDataHandler().getContent();
 		assertNotNull(content);
 
-		assertEquals(replyTo, message.getReplyTo()[0].toString());
+		assertEquals(replyTo, mimeMessage.getReplyTo()[0].toString());
+
+	}
+
+	@Test
+	public void thatBuilderBuildsMultipartMixedMailsPlainTextWithAttachments() throws Exception
+	{
+		// given
+		String sender = "sender";
+		Set<String> recipients = new HashSet<String>(Arrays.asList("recipient1"));
+		String subject = "subject";
+		String plainTextBody = "plainTextBody";
+		String replyTo = "replyTo";
+
+		com.arcusx.mailer.Message message = createMessage(sender, recipients, replyTo, subject, plainTextBody, null);
+		message.addMessageAttachment("attachment.pdf", "application/pdf", new byte[] {
+				12,
+				13,
+				14,
+				15,
+				16});
+
+		// when
+		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+
+		// then
+		final Address[] fromAddresses = mimeMessage.getFrom();
+		assertNotNull(fromAddresses);
+		assertEquals(1, fromAddresses.length);
+		assertEquals(sender, fromAddresses[0].toString());
+		assertEquals(subject, mimeMessage.getSubject());
+		final Address[] recipientAddresses = mimeMessage.getRecipients(Message.RecipientType.TO);
+		assertNotNull(recipientAddresses);
+		assertEquals(recipients.size(), recipientAddresses.length);
+
+		String expectedContentType = "multipart/mixed";
+		String actualContentType = mimeMessage.getDataHandler().getContentType();
+		assertContentTypeStartsWith(expectedContentType, actualContentType);
+		Multipart content = (Multipart) mimeMessage.getContent();
+		assertNotNull(content);
+
+		assertEquals(replyTo, mimeMessage.getReplyTo()[0].toString());
+
 	}
 
 	@Test
@@ -158,58 +201,85 @@ public class MimeMessageBuilderTest
 		String subject = "subject";
 		String plainTextBody = "plainTextBody";
 		HtmlMessageBody htmlBody = new HtmlMessageBody("<html><body><img src=\"/de/logo.png\"/>htmlText</body></html>");
-		final byte[] imageData = new byte[] { 12, 12, 12, 12, 12};
+		final byte[] imageData = new byte[] {
+				12,
+				12,
+				12,
+				12,
+				12};
 		htmlBody.addInlineImage("/de/logo.png", "image/png", imageData);
 		String replyTo = null;
 
-		MimeMessageBuilder builder = new MimeMessageBuilder(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
+		com.arcusx.mailer.Message message = createMessage(sender, recipients, replyTo, subject, plainTextBody, htmlBody);
 
 		// when
-		MimeMessage message = builder.createMimeMessage();
+		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
 
 		// then
-		final Address[] fromAddresses = message.getFrom();
+		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
 		assertEquals(sender, fromAddresses[0].toString());
-		assertEquals(subject, message.getSubject());
-		final Address[] recipientAddresses = message.getRecipients(Message.RecipientType.TO);
+		assertEquals(subject, mimeMessage.getSubject());
+		final Address[] recipientAddresses = mimeMessage.getRecipients(Message.RecipientType.TO);
 		assertNotNull(recipientAddresses);
 		assertEquals(recipients.size(), recipientAddresses.length);
 
-		DataHandler dataHandler = message.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/related"));
-		Multipart content = (Multipart) dataHandler.getContent();
+		String expectedContentType = "multipart/related";
+		String actualContentType = mimeMessage.getDataHandler().getContentType();
+		assertContentTypeStartsWith(expectedContentType, actualContentType);
+		Multipart content = (Multipart) mimeMessage.getDataHandler().getContent();
 		assertNotNull(content);
 		assertEquals(2, content.getCount());
 
 		final BodyPart alternativeMultipartBodyPart = content.getBodyPart(0);
-		dataHandler = alternativeMultipartBodyPart.getDataHandler();
-		assertTrue(dataHandler.getContentType().startsWith("multipart/alternative"));
-		Multipart alternativeMultipart = (Multipart) dataHandler.getContent();
+		expectedContentType = "multipart/alternative";
+		actualContentType = alternativeMultipartBodyPart.getDataHandler().getContentType();
+		assertContentTypeStartsWith(expectedContentType, actualContentType);
+		Multipart alternativeMultipart = (Multipart) alternativeMultipartBodyPart.getDataHandler().getContent();
 		assertNotNull(alternativeMultipart);
 		assertEquals(2, alternativeMultipart.getCount());
 
 		final BodyPart plainTextPart = alternativeMultipart.getBodyPart(0);
 		assertNotNull(plainTextPart);
-		dataHandler = plainTextPart.getDataHandler();
-		assertEquals("text/plain; charset=UTF-8", dataHandler.getContentType());
-		assertEquals(plainTextBody, dataHandler.getContent());
+		assertEquals("text/plain; charset=UTF-8; format=flowed", plainTextPart.getContentType());
+		assertEquals(plainTextBody, plainTextPart.getContent());
 
 		final BodyPart htmlPart = alternativeMultipart.getBodyPart(1);
-		dataHandler = htmlPart.getDataHandler();
-		assertEquals("text/html; charset=UTF-8", dataHandler.getContentType());
-		assertEquals("<html><body><img src=\"cid:/de/logo.png\"/>htmlText</body></html>", dataHandler.getContent());
+		assertEquals("text/html; charset=UTF-8; format=flowed", htmlPart.getContentType());
+		assertEquals("<html><body><img src=\"cid:/de/logo.png\"/>htmlText</body></html>", htmlPart.getContent());
 
 		final BodyPart imagePart = content.getBodyPart(1);
-		dataHandler = imagePart.getDataHandler();
 		assertEquals("inline", imagePart.getDisposition());
 		final String[] header = imagePart.getHeader("Content-ID");
 		assertEquals(1, header.length);
 		assertEquals("/de/logo.png", header[0]);
-		assertEquals("image/png", dataHandler.getContentType());
-		assertEquals(imageData, dataHandler.getContent());
+		assertEquals("image/png", imagePart.getDataHandler().getContentType());
+		assertEquals(imageData, imagePart.getDataHandler().getContent());
 
-		assertEquals(sender, message.getReplyTo()[0].toString());
+		assertEquals(sender, mimeMessage.getReplyTo()[0].toString());
+
+	}
+
+	private static void assertContentTypeStartsWith(String expectedContentType, String actualContentType)
+	{
+		assertTrue(actualContentType + " should start with " + expectedContentType, actualContentType.startsWith(expectedContentType));
+	}
+
+	private com.arcusx.mailer.Message createMessage(String sender, Collection<String> recipients, String replyTo, String subject, String plainTextBody,
+			HtmlMessageBody htmlBody)
+	{
+		com.arcusx.mailer.Message message = new com.arcusx.mailer.Message();
+		message.setSender(sender);
+		message.setReplyTo(replyTo);
+		message.setBody(plainTextBody);
+		message.setHtmlBody(htmlBody);
+
+		for (String recipient : recipients)
+		{
+			message.addRecipient(recipient);
+		}
+		message.setSubject(subject);
+		return message;
 	}
 }

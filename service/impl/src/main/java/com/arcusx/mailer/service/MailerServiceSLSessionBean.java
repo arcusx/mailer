@@ -19,6 +19,9 @@
 
 package com.arcusx.mailer.service;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
@@ -27,6 +30,7 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.mail.MessagingException;
 import javax.sql.DataSource;
 
 import org.jboss.annotation.ejb.RemoteBinding;
@@ -67,12 +71,11 @@ public class MailerServiceSLSessionBean implements MailerService
 	{
 		try
 		{
-			byte[] mimeMessageBytes = new MimeMessageBuilder(message.getSender(), message.getRecipients(),
-					message.getCcRecipients(), message.getReplyTo(), message.getSubject(), message.getBody(),
-					message.getHtmlBody()).createMimeMessageAsBytes();
+			MimeMessageBuilder messageBuilder = new MimeMessageBuilder();
+			byte[] mimeMessageBytes = messageBuilder.createMimeMessageAsBytes(message);
 			this.messageStore.storeMessage(mimeMessageBytes);
 		}
-		catch (Exception ex)
+		catch (MessagingException | IOException | SQLException ex)
 		{
 			throw new EJBException(ex);
 		}

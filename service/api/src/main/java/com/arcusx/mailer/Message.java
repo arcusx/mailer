@@ -20,8 +20,10 @@
 package com.arcusx.mailer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,6 +50,8 @@ public class Message implements Serializable
 	private HtmlMessageBody htmlBody;
 
 	private String replyTo;
+
+	private List<MessageAttachment> messageAttachments = new ArrayList<MessageAttachment>();
 
 	public Message()
 	{
@@ -143,4 +147,18 @@ public class Message implements Serializable
 		this.ccRecipients = ccRecipients;
 	}
 
+	public boolean hasAttachments()
+	{
+		return !this.messageAttachments.isEmpty();
+	}
+
+	public void addMessageAttachment(String name, String contentType, byte[] data)
+	{
+		this.messageAttachments.add(new MessageAttachment(name, contentType, data));
+	}
+
+	public Iterable<MessageAttachment> getMessageAttachments()
+	{
+		return Collections.unmodifiableList(this.messageAttachments);
+	}
 }

@@ -7,13 +7,13 @@ package com.arcusx.mailer.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.activation.DataHandler;
+import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
@@ -23,187 +23,239 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import com.arcusx.mailer.HtmlMessageBody;
+import com.arcusx.mailer.Message;
+import com.arcusx.mailer.MessageAttachment;
 import com.arcusx.mailer.MessageImage;
 
 public class MimeMessageBuilder
 {
-	private final String sender;
-	private final Set<String> recipients;
-	private final String replyTo;
-	private final String subject;
-	private final String plainTextBody;
-	private final HtmlMessageBody htmlBody;
-	private final Set<String> ccRecipients;
+	private static final String CONTENT_TYPE = "Content-Type";
+	private static final String TEXT_PLAIN_CHARSET_UTF8_FORMAT_FLOWED = "text/plain; charset=UTF-8; format=flowed";
+	private static final String TEXT_HTML_CHARSET_UTF8_FORMAT_FLOWED = "text/html; charset=UTF-8; format=flowed";
 
-	public MimeMessageBuilder(String sender, Set<String> recipients, String replyTo, String subject, String plainTextBody, HtmlMessageBody htmlBody)
+	private static final String MIME_SUBTYPE_RELATED = "related";
+	private static final String MIME_SUBTYPE_ALTERNATIVE = "alternative";
+	private static final String MIME_SUBTYPE_MIXED = "mixed";
+
+	MimeMessage createMimeMessage(Message message) throws MessagingException, IOException
 	{
-		this(sender, recipients, Collections.<String> emptySet(), replyTo, subject, plainTextBody, htmlBody);
+		Object messageBody = buildMessageContentFor(message);
+
+		if (message.hasAttachments())
+			messageBody = wrapAsMixedWithAttachments((BodyPart) messageBody, message.getMessageAttachments());
+
+		return buildMessageWithBodyAndHeaders(messageBody, message);
 	}
 
-	public MimeMessageBuilder(String sender, Set<String> recipients, Set<String> ccRecipients, String replyTo, String subject, String plainTextBody,
-			HtmlMessageBody htmlBody)
+	public byte[] createMimeMessageAsBytes(Message message) throws MessagingException, IOException
 	{
-		this.sender = sender;
-		this.recipients = recipients;
-		this.ccRecipients = ccRecipients;
-		this.replyTo = replyTo;
-		this.subject = subject;
-		this.plainTextBody = plainTextBody;
-		this.htmlBody = htmlBody;
+		MimeMessage mimeMessage = createMimeMessage(message);
+
+		return toBytes(mimeMessage);
 	}
 
-	public byte[] createMimeMessageAsBytes() throws MessagingException, IOException
+	private byte[] toBytes(MimeMessage mimeMessage) throws IOException, MessagingException
 	{
-		MimeMessage mimeMessage = createMimeMessage();
 		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
 		mimeMessage.writeTo(bytesOut);
 		bytesOut.close();
 		return bytesOut.toByteArray();
 	}
 
-	public MimeMessage createMimeMessage() throws MessagingException
+	private MimeMessage buildMessageWithBodyAndHeaders(Object messageBody, Message message) throws AddressException, MessagingException, IOException
 	{
-		if (this.sender == null)
-			throw new IllegalArgumentException("Sender is null.");
-		if (this.subject == null)
-			throw new IllegalArgumentException("Subject is null.");
+		MimeMessage mimeMessage = new MimeMessage((Session) null);
+		fillAddressesAndSubject(mimeMessage, message);
 
-		MimeMessage message = null;
+		if (messageBody instanceof Multipart)
+		{
+			mimeMessage.setContent((Multipart) messageBody);
+		}
+		else if (messageBody instanceof BodyPart)
+		{
+			BodyPart bodyPart = (BodyPart) messageBody;
+			Object content = bodyPart.getContent();
+			String contentType = bodyPart.getContentType();
+			mimeMessage.setContent(content, contentType);
+		}
 
-		boolean hasPlainTextBody = notNullAndNotEmpty(this.plainTextBody);
-		boolean hasHtmlBody = this.htmlBody != null;
-		if (hasPlainTextBody && !hasHtmlBody)
+		return mimeMessage;
+	}
+
+	private void fillAddressesAndSubject(MimeMessage mimeMessage, Message message) throws MessagingException, AddressException
+	{
+		fillSender(mimeMessage, message);
+
+		fillRecipients(mimeMessage, message);
+
+		fillCcRecipients(mimeMessage, message);
+
+		fillSubject(mimeMessage, message);
+
+		fillReplyTo(mimeMessage, message);
+	}
+
+	private void fillSender(MimeMessage mimeMessage, Message message) throws MessagingException, AddressException
+	{
+		String sender = message.getSender();
+		mimeMessage.setFrom(new InternetAddress(sender));
+	}
+
+	private void fillRecipients(MimeMessage mimeMessage, Message message) throws MessagingException, AddressException
+	{
+		Set<String> recipients = message.getRecipients();
+		for (String recipient : recipients)
 		{
-			message = createPlainTextEmail();
+			mimeMessage.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(recipient));
 		}
-		else if (!hasPlainTextBody && hasHtmlBody)
+	}
+
+	private void fillCcRecipients(MimeMessage mimeMessage, Message message) throws MessagingException, AddressException
+	{
+		Set<String> ccRecipients = message.getCcRecipients();
+		for (String ccRecipient : ccRecipients)
 		{
-			message = createHtmlOnlyEmail();
+			mimeMessage.addRecipient(javax.mail.Message.RecipientType.CC, new InternetAddress(ccRecipient));
 		}
-		else if (hasPlainTextBody && hasHtmlBody)
+	}
+
+	private void fillSubject(MimeMessage mimeMessage, Message message) throws MessagingException
+	{
+		String subject = message.getSubject();
+		mimeMessage.setSubject(subject);
+	}
+
+	private void fillReplyTo(MimeMessage mimeMessage, Message message) throws MessagingException, AddressException
+	{
+		String replyTo = message.getReplyTo();
+		if (replyTo != null)
 		{
-			message = createMultiPartEmail();
+			mimeMessage.setReplyTo(new InternetAddress[] { new InternetAddress(replyTo)});
+		}
+	}
+
+	private BodyPart buildMessageContentFor(Message message) throws MessagingException
+	{
+		boolean htmlImages = message.getHtmlBody() != null && message.getHtmlBody().hasImages();
+
+		BodyPart messageBody = buildMessageBodyFor(message);
+		if (htmlImages)
+		{
+			Multipart multipart = wrapAsRelatedWithEmbeddedImages(messageBody, message.getHtmlBody().getImages());
+			return wrapAsBodyPart(multipart);
 		}
 		else
 		{
+			return messageBody;
+		}
+	}
+
+	private BodyPart buildMessageBodyFor(Message message) throws MessagingException
+	{
+		boolean plain = message.getBody() != null;
+		boolean html = message.getHtmlBody() != null;
+
+		if (plain && html)
+		{
+			MimeMultipart multipart = wrapAsAlternative(createPlainFor(message), createHtmlFor(message.getHtmlBody()));
+			return wrapAsBodyPart(multipart);
+		}
+		else if (plain)
+			return createPlainFor(message);
+		else if (html)
+			return createHtmlFor(message.getHtmlBody());
+		else
 			throw new IllegalArgumentException("Neither plain text body nor html body. Can't send empty mail.");
-		}
-		return message;
 	}
 
-	public boolean notNullAndNotEmpty(final String text)
+	private Multipart wrapAsMixedWithAttachments(BodyPart messageBody, Iterable<MessageAttachment> messageAttachments) throws MessagingException
 	{
-		return text != null && !text.trim().isEmpty();
+		MimeMultipart mixedMultipart = new MimeMultipart(MIME_SUBTYPE_MIXED);
+		mixedMultipart.addBodyPart(messageBody);
+
+		List<MimeBodyPart> attachmentBodyParts = createAttachmentBodyParts(messageAttachments);
+		addBodyParts(mixedMultipart, attachmentBodyParts);
+
+		return mixedMultipart;
 	}
 
-	private MimeMessage createPlainTextEmail() throws MessagingException
+	private MimeBodyPart wrapAsBodyPart(Multipart multipart) throws MessagingException
 	{
-		MimeMessage message = new MimeMessage((Session) null);
-		fillAddressesAndSubject(message);
-		message.setText(this.plainTextBody, "UTF-8");
-
-		return message;
+		MimeBodyPart multipartBodyPart = new MimeBodyPart();
+		multipartBodyPart.setContent(multipart);
+		return multipartBodyPart;
 	}
 
-	private MimeMessage createHtmlOnlyEmail() throws MessagingException
+	private Multipart wrapAsRelatedWithEmbeddedImages(BodyPart content, List<MessageImage> images) throws MessagingException
 	{
-		MimeMessage message = new MimeMessage((Session) null);
-		fillAddressesAndSubject(message);
-		message.addHeader("Content-Type", "text/html; charset=UTF-8");
-		message.setText(this.htmlBody.getHtml(), "UTF-8", "html");
+		MimeMultipart relatedMultipart = new MimeMultipart(MIME_SUBTYPE_RELATED);
+		relatedMultipart.addBodyPart(content);
 
-		return message;
+		List<MimeBodyPart> imageBodyParts = createImageBodyParts(images);
+		addBodyParts(relatedMultipart, imageBodyParts);
+
+		return relatedMultipart;
 	}
 
-	private MimeMessage createMultiPartEmail() throws MessagingException
+	private void addBodyParts(MimeMultipart multipart, List<MimeBodyPart> bodyParts) throws MessagingException
 	{
-		MimeMessage message = new MimeMessage((Session) null);
-		fillAddressesAndSubject(message);
-
-		MimeBodyPart plainTextBodyPart = createPlainTextBodyPart();
-		MimeBodyPart htmlBodyPart = createHtmlRelatedMultipartBodyPart();
-
-		MimeMultipart alternativeMultipart = new MimeMultipart();
-		alternativeMultipart.setSubType("alternative");
-
-		alternativeMultipart.addBodyPart(plainTextBodyPart);
-		alternativeMultipart.addBodyPart(htmlBodyPart);
-
-		MimeBodyPart alternativeMultipartBodyPart = new MimeBodyPart();
-		alternativeMultipartBodyPart.setContent(alternativeMultipart);
-
-		MimeMultipart relatedMultipart = new MimeMultipart();
-		relatedMultipart.setSubType("related");
-		relatedMultipart.addBodyPart(alternativeMultipartBodyPart);
-
-		List<MimeBodyPart> createImageBodyParts = createImageBodyParts();
-		for (MimeBodyPart mimeBodyPart : createImageBodyParts)
+		for (MimeBodyPart mimeBodyPart : bodyParts)
 		{
-			relatedMultipart.addBodyPart(mimeBodyPart);
+			multipart.addBodyPart(mimeBodyPart);
 		}
-
-		message.setContent(relatedMultipart);
-
-		return message;
 	}
 
-	private MimeBodyPart createHtmlRelatedMultipartBodyPart() throws MessagingException
+	private MimeMultipart wrapAsAlternative(MimeBodyPart plainPart, MimeBodyPart htmlPart) throws MessagingException
 	{
-		MimeBodyPart htmlBodyPart = new MimeBodyPart();
-		htmlBodyPart.addHeader("Content-Type", "text/html; charset=UTF-8");
-		String html = this.htmlBody.getHtml();
-		final List<MessageImage> images = this.htmlBody.getImages();
-		for (MessageImage image : images)
-		{
-			html = html.replace(image.identifier, "cid:" + image.identifier);
-		}
-		htmlBodyPart.setText(html, "UTF-8", "html");
-		return htmlBodyPart;
+		MimeMultipart alternativeMultipart = new MimeMultipart(MIME_SUBTYPE_ALTERNATIVE);
+		alternativeMultipart.addBodyPart(plainPart);
+		alternativeMultipart.addBodyPart(htmlPart);
+		return alternativeMultipart;
 	}
 
-	private List<MimeBodyPart> createImageBodyParts() throws MessagingException
+	private MimeBodyPart createHtmlFor(HtmlMessageBody body) throws MessagingException
+	{
+		MimeBodyPart htmlTextBodyPart = new MimeBodyPart();
+		HtmlImageIdExpander expander = new HtmlImageIdExpander(body.getHtml(), body.getImages());
+		htmlTextBodyPart.setText(expander.getHtmlWithImageIdsExpanded());
+		htmlTextBodyPart.addHeader(CONTENT_TYPE, TEXT_HTML_CHARSET_UTF8_FORMAT_FLOWED);
+		return htmlTextBodyPart;
+	}
+
+	private MimeBodyPart createPlainFor(Message message) throws MessagingException
+	{
+		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
+		plainTextBodyPart.setText(message.getBody());
+		plainTextBodyPart.addHeader(CONTENT_TYPE, TEXT_PLAIN_CHARSET_UTF8_FORMAT_FLOWED);
+		return plainTextBodyPart;
+	}
+
+	private List<MimeBodyPart> createImageBodyParts(List<MessageImage> images) throws MessagingException
 	{
 		List<MimeBodyPart> imageBodyParts = new ArrayList<MimeBodyPart>();
-		final List<MessageImage> images = this.htmlBody.getImages();
 		for (MessageImage image : images)
 		{
 			MimeBodyPart imageBodyPart = new MimeBodyPart();
-			imageBodyPart.setDataHandler(new DataHandler(image.data, image.type));
+			imageBodyPart.setDataHandler(new DataHandler(image.getData(), image.getContentType()));
 			imageBodyPart.setContentID(image.identifier);
 			imageBodyPart.setDisposition(Part.INLINE);
-			imageBodyPart.setFileName(image.name);
+			imageBodyPart.setFileName(image.getName());
 			imageBodyParts.add(imageBodyPart);
 		}
 		return imageBodyParts;
 	}
 
-	private MimeBodyPart createPlainTextBodyPart() throws MessagingException
+	private List<MimeBodyPart> createAttachmentBodyParts(Iterable<MessageAttachment> attachments) throws MessagingException
 	{
-		MimeBodyPart plainTextBodyPart = new MimeBodyPart();
-		plainTextBodyPart.addHeader("Content-Type", "text/plain; charset=UTF-8; format=flowed");
-		plainTextBodyPart.setText(this.plainTextBody, "UTF-8");
-		return plainTextBodyPart;
-	}
-
-	private void fillAddressesAndSubject(MimeMessage message) throws MessagingException, AddressException
-	{
-		message.setFrom(new InternetAddress(this.sender));
-
-		for (Iterator<String> iter = this.recipients.iterator(); iter.hasNext();)
+		List<MimeBodyPart> attachmentBodyParts = new ArrayList<MimeBodyPart>();
+		for (MessageAttachment attachment : attachments)
 		{
-			message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(iter.next()));
+			MimeBodyPart attachmentBodyPart = new MimeBodyPart();
+			attachmentBodyPart.setDataHandler(new DataHandler(attachment.getData(), attachment.getContentType()));
+			attachmentBodyPart.setDisposition(Part.ATTACHMENT);
+			attachmentBodyPart.setFileName(attachment.getName());
+			attachmentBodyParts.add(attachmentBodyPart);
 		}
-
-		for (Iterator<String> iter = this.ccRecipients.iterator(); iter.hasNext();)
-		{
-			message.addRecipient(javax.mail.Message.RecipientType.CC, new InternetAddress(iter.next()));
-		}
-
-		message.setSubject(this.subject);
-
-		if (this.replyTo != null)
-		{
-			message.setReplyTo(new InternetAddress[] { new InternetAddress(this.replyTo)});
-		}
+		return attachmentBodyParts;
 	}
 }

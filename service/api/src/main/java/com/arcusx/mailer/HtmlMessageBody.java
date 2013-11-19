@@ -49,4 +49,9 @@ public class HtmlMessageBody implements Serializable
 	{
 		return Collections.unmodifiableList(this.inlineImages);
 	}
+
+	public boolean hasImages()
+	{
+		return !this.inlineImages.isEmpty();
+	}
 }
