@@ -66,8 +66,11 @@ public class MimeMessageBuilderTest
 
 		// when
 		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+		byte[] bytes = this.builder.createMimeMessageAsBytes(message);
 
 		// then
+		assertNotNull(bytes);
+		assertTrue(bytes.length > 0);
 		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
@@ -97,8 +100,11 @@ public class MimeMessageBuilderTest
 
 		// when
 		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+		byte[] bytes = this.builder.createMimeMessageAsBytes(message);
 
 		// then
+		assertNotNull(bytes);
+		assertTrue(bytes.length > 0);
 		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
@@ -130,8 +136,11 @@ public class MimeMessageBuilderTest
 
 		// when
 		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+		byte[] bytes = this.builder.createMimeMessageAsBytes(message);
 
 		// then
+		assertNotNull(bytes);
+		assertTrue(bytes.length > 0);
 		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
@@ -171,8 +180,11 @@ public class MimeMessageBuilderTest
 
 		// when
 		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+		byte[] bytes = this.builder.createMimeMessageAsBytes(message);
 
 		// then
+		assertNotNull(bytes);
+		assertTrue(bytes.length > 0);
 		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);
@@ -214,8 +226,11 @@ public class MimeMessageBuilderTest
 
 		// when
 		MimeMessage mimeMessage = this.builder.createMimeMessage(message);
+		byte[] bytes = this.builder.createMimeMessageAsBytes(message);
 
 		// then
+		assertNotNull(bytes);
+		assertTrue(bytes.length > 0);
 		final Address[] fromAddresses = mimeMessage.getFrom();
 		assertNotNull(fromAddresses);
 		assertEquals(1, fromAddresses.length);

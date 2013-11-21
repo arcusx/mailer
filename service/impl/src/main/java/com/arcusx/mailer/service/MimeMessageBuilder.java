@@ -42,7 +42,7 @@ public class MimeMessageBuilder
 		Object messageBody = buildMessageContentFor(message);
 
 		if (message.hasAttachments())
-			messageBody = wrapAsMixedWithAttachments((BodyPart) messageBody, message.getMessageAttachments());
+			messageBody = wrapAsMixedWithAttachments(messageBody, message.getMessageAttachments());
 
 		return buildMessageWithBodyAndHeaders(messageBody, message);
 	}
@@ -77,6 +77,10 @@ public class MimeMessageBuilder
 			Object content = bodyPart.getContent();
 			String contentType = bodyPart.getContentType();
 			mimeMessage.setContent(content, contentType);
+		}
+		else
+		{
+			throw new IllegalStateException("Message body (" + messageBody + ") is neither body part nor multipart.");
 		}
 
 		return mimeMessage;
@@ -134,15 +138,15 @@ public class MimeMessageBuilder
 		}
 	}
 
-	private BodyPart buildMessageContentFor(Message message) throws MessagingException
+	private Object buildMessageContentFor(Message message) throws MessagingException
 	{
 		boolean htmlImages = message.getHtmlBody() != null && message.getHtmlBody().hasImages();
 
-		BodyPart messageBody = buildMessageBodyFor(message);
+		Object messageBody = buildMessageBodyFor(message);
 		if (htmlImages)
 		{
 			Multipart multipart = wrapAsRelatedWithEmbeddedImages(messageBody, message.getHtmlBody().getImages());
-			return wrapAsBodyPart(multipart);
+			return multipart;
 		}
 		else
 		{
@@ -150,7 +154,7 @@ public class MimeMessageBuilder
 		}
 	}
 
-	private BodyPart buildMessageBodyFor(Message message) throws MessagingException
+	private Object buildMessageBodyFor(Message message) throws MessagingException
 	{
 		boolean plain = message.getBody() != null;
 		boolean html = message.getHtmlBody() != null;
@@ -158,7 +162,7 @@ public class MimeMessageBuilder
 		if (plain && html)
 		{
 			MimeMultipart multipart = wrapAsAlternative(createPlainFor(message), createHtmlFor(message.getHtmlBody()));
-			return wrapAsBodyPart(multipart);
+			return multipart;
 		}
 		else if (plain)
 			return createPlainFor(message);
@@ -166,6 +170,21 @@ public class MimeMessageBuilder
 			return createHtmlFor(message.getHtmlBody());
 		else
 			throw new IllegalArgumentException("Neither plain text body nor html body. Can't send empty mail.");
+	}
+
+	private Multipart wrapAsMixedWithAttachments(Object content, Iterable<MessageAttachment> messageAttachments) throws MessagingException
+	{
+		if (content instanceof Multipart)
+			return wrapAsMixedWithAttachments((Multipart) content, messageAttachments);
+		else if (content instanceof BodyPart)
+			return wrapAsMixedWithAttachments((BodyPart) content, messageAttachments);
+		else
+			throw new IllegalStateException("Content is neither BodyPart nor Multipart (content=" + content + ").");
+	}
+
+	private Multipart wrapAsMixedWithAttachments(Multipart content, Iterable<MessageAttachment> messageAttachments) throws MessagingException
+	{
+		return wrapAsMixedWithAttachments(wrapAsBodyPart(content), messageAttachments);
 	}
 
 	private Multipart wrapAsMixedWithAttachments(BodyPart messageBody, Iterable<MessageAttachment> messageAttachments) throws MessagingException
@@ -184,6 +203,21 @@ public class MimeMessageBuilder
 		MimeBodyPart multipartBodyPart = new MimeBodyPart();
 		multipartBodyPart.setContent(multipart);
 		return multipartBodyPart;
+	}
+
+	private Multipart wrapAsRelatedWithEmbeddedImages(Object content, List<MessageImage> images) throws MessagingException
+	{
+		if (content instanceof Multipart)
+			return wrapAsRelatedWithEmbeddedImages((Multipart) content, images);
+		else if (content instanceof BodyPart)
+			return wrapAsRelatedWithEmbeddedImages((BodyPart) content, images);
+		else
+			throw new IllegalStateException("Content is neither BodyPart nor Multipart (content=" + content + ").");
+	}
+
+	private Multipart wrapAsRelatedWithEmbeddedImages(Multipart content, List<MessageImage> images) throws MessagingException
+	{
+		return wrapAsRelatedWithEmbeddedImages(wrapAsBodyPart(content), images);
 	}
 
 	private Multipart wrapAsRelatedWithEmbeddedImages(BodyPart content, List<MessageImage> images) throws MessagingException
